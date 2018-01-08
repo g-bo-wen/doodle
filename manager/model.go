@@ -8,7 +8,6 @@ import (
 
 //userinfo erp中用户信息
 type userinfo struct {
-	ID        int64
 	Status    int
 	IsAdmin   bool
 	Res       []int64
@@ -20,7 +19,7 @@ type userinfo struct {
 	OrgID     string `json:"orgId"`
 	OrgName   string `json:"orgName"`
 	User      string `json:"fullname"`
-	UserID    int    `json:"userId"`
+	UserID    int64  `json:"userId"`
 	Username  string `json:"username"`
 }
 

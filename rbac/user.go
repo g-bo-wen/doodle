@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dearcode/crab/http/server"
+	"github.com/dearcode/crab/orm"
 	"github.com/juju/errors"
 	"github.com/zssky/log"
 
@@ -155,4 +156,37 @@ func UserGetAll(appID int64) ([]meta.User, error) {
 	}
 
 	return us, nil
+}
+
+type rbacUserInfo struct {
+}
+
+func (ru *rbacUserInfo) GET(w http.ResponseWriter, r *http.Request) {
+	vars := struct {
+		Email string `json:"email"`
+	}{}
+
+	if err := util.DecodeRequestValue(r, &vars); err != nil {
+		server.SendResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	db, err := mdb.GetConnection()
+	if err != nil {
+		log.Errorf("get db connection error:%v", errors.ErrorStack(err))
+		server.SendResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer db.Close()
+
+	var u meta.User
+
+	if err = orm.NewStmt(db, "user").Where("email='%s'", vars.Email).Query(&u); err != nil {
+		log.Errorf("db query user:%s error:%v", vars.Email, errors.ErrorStack(err))
+		server.SendResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	log.Debugf("query User:%v", u)
+	server.SendResponseData(w, u)
 }

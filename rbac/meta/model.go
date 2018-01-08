@@ -50,6 +50,18 @@ type User struct {
 	Mtime string `db:"mtime" db_default:"now()"`
 }
 
+//UserInfo 用户信息.
+type UserInfo struct {
+	ID    int64      `db:"id" db_default:"auto"`
+	AppID int64      `db:"app_id"`
+	Name  string     `db:"name"`
+	Email string     `db:"email"`
+	Res   []Resource `db_table:"one2more"`
+	Roles []Role     `db_table:"one2more"`
+	Ctime string     `db:"ctime" db_default:"now()"`
+	Mtime string     `db:"mtime" db_default:"now()"`
+}
+
 //RoleResource 角色与资源关联表.
 type RoleResource struct {
 	ID           int64  `db:"id" db_default:"auto"`

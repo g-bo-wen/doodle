@@ -119,6 +119,35 @@ func (c Client) GetUserResourceIDs(email string) ([]int64, error) {
 	return ids, nil
 }
 
+//GetUser 获取用户信息.
+func (c Client) GetUser(email string) (meta.User, error) {
+	url := fmt.Sprintf("http://%s/rbac/user/info/?email=%s", c.host, email)
+
+	buf, err := c.get(url)
+	if err != nil {
+		log.Infof("Get:%v error:%v", url, err)
+		return meta.User{}, errors.Trace(err)
+	}
+
+	log.Infof("get user info resp:%v", string(buf))
+
+	resp := struct {
+		Status  int
+		Data    meta.User
+		Message string
+	}{}
+
+	if err = json.Unmarshal(buf, &resp); err != nil {
+		return meta.User{}, errors.Trace(err)
+	}
+
+	if resp.Status != 0 {
+		return meta.User{}, errors.New(resp.Message)
+	}
+
+	return resp.Data, nil
+}
+
 //PostResource 添加资源.
 func (c Client) PostResource(name, comments string) (int64, error) {
 	form := url.Values{}

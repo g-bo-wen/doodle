@@ -17,6 +17,7 @@ import (
 type userDB struct {
 	admins *cache.Cache
 	res    *cache.Cache
+	uid    *cache.Cache
 	sync.RWMutex
 }
 
@@ -24,6 +25,7 @@ func newUserDB() *userDB {
 	return &userDB{
 		admins: cache.NewCache(int64(config.Manager.Cache.Timeout)),
 		res:    cache.NewCache(int64(config.Manager.Cache.Timeout)),
+		uid:    cache.NewCache(int64(config.Manager.Cache.Timeout)),
 	}
 }
 
@@ -129,4 +131,30 @@ func (u *userinfo) assert(resID int64) error {
 	}
 	log.Errorf("account:%+v, resourceID:%d", *u, resID)
 	return fmt.Errorf("you don't have permission to access")
+}
+
+//loadUserID 查找用户ID.
+func (u *userDB) loadUserID(email string) (int64, error) {
+	u.RLock()
+	if uid := u.uid.Get(email); uid != nil {
+		u.RUnlock()
+		log.Debugf("email:%v, id cache:%v", email, uid.(int64))
+		return uid.(int64), nil
+	}
+	u.RUnlock()
+
+	u.Lock()
+	defer u.Unlock()
+
+	if uid := u.uid.Get(email); uid != nil {
+		log.Debugf("email:%v, id cache:%v", email, uid.(int64))
+		return uid.(int64), nil
+	}
+
+	info, err := rbacClient.GetUser(email)
+	if err != nil {
+		return 0, errors.Trace(err)
+	}
+	log.Debugf("rbac email:%s, user:%+v", email, info)
+	return info.ID, nil
 }

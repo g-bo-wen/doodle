@@ -26,6 +26,7 @@ func ServerInit() error {
 	mdb = orm.NewDB(config.RBAC.DB.IP, config.RBAC.DB.Port, config.RBAC.DB.Name, config.RBAC.DB.User, config.RBAC.DB.Passwd, config.RBAC.DB.Charset, 10)
 
 	server.RegisterPath(&rbacUser{}, "/rbac/user/")
+	server.RegisterPath(&rbacUserInfo{}, "/rbac/user/info/")
 	server.RegisterPath(&userRole{}, "/rbac/user/role/")
 	server.RegisterPath(&rbacRoleUser{}, "/rbac/role/user/")
 	server.RegisterPath(&rbacRoleResource{}, "/rbac/role/resource/")
