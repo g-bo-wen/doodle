@@ -1,0 +1,300 @@
+<div class="toplink">
+    <div class="container">
+        <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+        <a target="_parent" href="?action=project&page=project" >项目管理</a>
+        <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+        <span class="active" id="link_title">项目列表</span>
+    </div> 
+</div>
+<div class="container" >
+    <p>
+    <button type="button" class="btn btn-success" onclick="newProject()">新建项目</button>
+    </p>
+    <table id="data_table"  
+        data-toggle="table"
+        data-url="project/"
+        data-pagination="true"
+        data-side-pagination="server"
+        data-sort-order="desc"
+        data-page-list="[5, 10, 20, 50, 100, 200]"
+        style="word-break:break-all; word-wrap:break-all;"
+        > 
+        <thead>
+            <tr>
+                <th data-field= 'name' data-sortable="true"  data-formatter="nameFormatter">名称</th>
+                <th data-field= 'user' data-sortable="true">管理员</th>
+                <th data-field= 'email' data-sortable="true">邮箱</th>
+                <th data-field= 'path' data-sortable="true">路径</th>
+                <th data-field= 'version' data-sortable="true" data-formatter="versionFormatter">架构版本</th>
+                <th data-field= 'comments' data-sortable="true">备注</th>
+                <th data-field= 'mtime' data-sortable="true">时间</th>
+                <th data-formatter="actionFormatter" data-events="actionEvents">操作</th>
+            </tr>
+        </thead>
+
+    </table>
+
+
+    <div class="modal fade" id="project_dialog" style="z-index:2000">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="modal_title" >项目</h4>
+                </div>
+                <div class="modal-body" id="modal_content">
+                    <form class="form-horizontal" role="form" id="form_project" >
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">名称</label>
+                            <div class="col-sm-10">
+                                <input type="text" maxlength="64" class="form-control" id="name" name="name" oninput="onInput()" value="" placeholder="项目名称, 中文, 必填" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">项目管理员</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="user" name="user" value="" placeholder="项目管理员,中文" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">邮箱地址</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="email" name="email" value="" placeholder="项目管理员邮箱地址" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">架构版本</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="version" name="version" onchange="onVersionChange()">
+                                    <option value="0" selected="selected">1.0 (Proxy模式)</option>
+                                    <option value="1">2.0 (Faas模式)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="div_v2_source" style="display:none;" >
+                            <label class="col-sm-2 control-label">源码地址</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="source" name="source" value="" maxlength="128" oninput="onInput()" placeholder="Faas模式 服务提供方源码的Git地址, 必填" >
+                            </div>
+                        </div>
+                        <div class="form-group" id="div_v2_key" style="display:none;" >
+                            <label class="col-sm-2 control-label">Deploy Key</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" readonly="readonly"> ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCfSfJ6qIUgbWkZnRtuZM45HVKoqqR2593t4ZtnynT4AXprtqxupuFAepPBm5Ib7gz0H+i1OSUwH1rLUYVZ1wNG/HWQbCyTZL3tg5IBGuyGE/Pw77LFaGYs5HML4l7VrQV07M/fEiYbSPg+EMFdQ08WkefPdXUpfaUIHC13n4fpat6+7oxgHCoF0mzH1xsjMfAaDoEp9Gg2R6uBlKJLTeJnqYBoG9w4kiWDwaHtZcOiK3r+jW30oYPxlGgmkZMUdzPIQmaSLriUequEVgsfONkVjTxHhKwhd+aZT8REG81Z0GNZQUTmCfdlmNNRJS/SFr8pLFtL0YuMZpmPIrL0yg/9 root@A01-R06-I180-104.JD.LOCAL
+                                </textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">路径</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="path" name="path" value="" maxlength="32" oninput="onInput()" placeholder="项目路径, 英文(字母数字), 必填" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">备注</label>
+                            <div class="col-sm-10">
+                                <input type="text" maxlength="500" class="form-control" id="comments" name="comments" oninput="onInput()" value="" placeholder="备注信息，必填, 最多500字符">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">放弃</button>
+                    <button type="button" class="btn btn-primary" onclick="submitProject()">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    //添加到接口的链接
+    function nameFormatter(value, row, index) {
+        return '<a href="?action=project&page=interface&projectID='+row.id+'" target="_parent">'+value+'</a> ';
+    }
+
+    function versionFormatter(value, row, index) {
+        switch(value)
+        {
+            case 0:
+            return '1.0'
+            case 1:
+            return '2.0'
+        }
+        return '1.0'
+    }
+
+    //添加`操作`列对应事件
+    function actionFormatter(value, row, index) {
+        return '<a class="edit glyphicon glyphicon-pencil" href="javascript:void(0)" title="修改"></a>'+
+        '&nbsp;&nbsp;'+
+        '<a class="delete glyphicon glyphicon-trash" href="javascript:void(0)" title="删除"></a>';
+    }
+
+
+
+    var modifyProjectID = 0;
+    //显示修改项目对话框
+    function modifyDialog(e, value, row, index) {
+        modifyProjectID = row.id;
+        $(".modal #name").val(row.name);
+        $(".modal #user").val(row.user);
+        $(".modal #email").val(row.email);
+        $(".modal #path").val(row.path);
+
+        if (row.version == "1") {
+            $(".modal #version").find("option[value='0']").attr("selected",false);
+            $(".modal #version").find("option[value='1']").attr("selected",true);
+        }
+        else {
+            $(".modal #version").find("option[value='1']").attr("selected",false);
+            $(".modal #version").find("option[value='0']").attr("selected",true);
+        }
+
+        onVersionChange();
+
+        $(".modal #source").val(row.source);
+
+        if (account.IsAdmin) {
+            $(".modal #user").removeAttr("readonly");
+            $(".modal #email").removeAttr("readonly");
+        }
+        else {
+            $(".modal #user").attr("readonly", "readonly");
+            $(".modal #email").attr("readonly", "readonly");
+        }
+
+        $(".modal #comments").val(row.comments);
+        $("#modal_title").html("修改项目信息");
+        $("#project_dialog").modal('show');
+    }
+
+    var confirmID = 0;
+    //显示删除项目确认对话框
+    function deleteDialog(e, value, row, index) {
+        confirmID = row.id;
+        $("#confirm_modal_title").html("确认要删除以下项目？");
+        $("#confirm_modal_content").html("<h4>"+row.name+"</h4>");
+        $("#confirm_dialog").modal('show');
+    }
+
+    function onVersionChange() {
+        if ($("#version").find("option:selected").val() == "1") {
+            $("#div_v2_source").show();
+            $("#div_v2_key").show();
+            }else {
+            $("#div_v2_source").hide();
+            $("#div_v2_key").hide();
+        }
+    }
+
+    function doConfirm() {
+        $("#confirm_dialog").modal('hide');
+        if (confirmID == 0) {
+            return;
+        }
+
+        $.ajax({
+            type: "DELETE",
+            url: "project/?id="+confirmID, 
+            async: false,
+            success: function(data,status) { 
+                showMessage("<h3>成功</h3>");
+                $('#data_table').bootstrapTable('refreshOptions',{pageNumber: 1,offset:0});
+                },
+                error: function(req, data, error) { 
+                    showMessage("<h3>失败:"+req.responseText+"</h3>");
+                    },
+                });
+            }
+
+
+            function newProject() {
+                if (modifyProjectID != 0) {
+                    modifyProjectID = 0;
+                    $("#name").val("");
+                    $("#path").val("");
+                    $("#comments").val("");
+                }
+                $(".modal #user").val(account.fullname);
+                $(".modal #email").val(account.email);
+
+                if (account.IsAdmin) {
+                    $(".modal #user").removeAttr("readonly");
+                    $(".modal #email").removeAttr("readonly");
+                    }else {
+                    $(".modal #user").attr("readonly", "readonly");
+                    $(".modal #email").attr("readonly", "readonly");
+                }
+                $("#modal_title").html("新建项目");
+                $("#project_dialog").modal('show');
+            }
+
+            //提交修改or添加的数据
+            function submitProject() {
+                if(checkEmpty($("#name").val())) {
+                    showMessage("名称不能为空");
+                    return;
+                }
+
+                if(checkEmpty($("#path").val())) {
+                    showMessage("路径不能为空");
+                    return;
+                }
+
+                if(!checkPath($("#path").val())){
+                    showMessage("路径格式不正确，只能包含数字和大小写字母");
+                    return;
+                }
+
+                if(checkEmpty($("#comments").val())) {
+                    showMessage("备注不能为空");
+                    return;
+                }
+
+                url = "project/";
+                method = "POST";
+                if (modifyProjectID != 0) {
+                    url += "?id="+modifyProjectID;
+                    method = "PUT";
+                }
+                var data = $("#form_project").serialize(); 
+                $.ajax({
+                    type: method,
+                    url: url,
+                    data: data,
+                    async: false,
+                    success: function(data,status) { 
+                        if (data.Status == 0) {
+                            $("#project_dialog").modal('hide');
+                            showMessage("<h3>成功</h3>");
+                            $('#data_table').bootstrapTable('refreshOptions',{pageNumber: 1,offset:0});
+                            $("#name").val("");
+                            $("#path").val("");
+                            $("#comments").val("");
+                            }else {
+                            showMessage("<h3>失败:"+data.Message+"</h3>");
+                        }
+                        },
+                        error: function(req, data, error) { 
+                            showMessage("<h3>失败:"+req.responseText+"</h3>"+error);
+                            },
+                        });
+                    }
+
+
+                    window.actionEvents = {
+                        'click .edit ': modifyDialog,
+                        'click .delete': deleteDialog,
+                    };
+
+                    var projectInfo;
+
+
+                    $(function (){
+                        $('#data_table').bootstrapTable('refreshOptions',{});
+                        $(document).attr("title","接口平台 - 项目列表");
+                        })
+                    </script>
