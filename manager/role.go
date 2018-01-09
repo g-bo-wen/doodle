@@ -264,7 +264,7 @@ func (ur *userRole) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Debugf("query:%v, role:%v", ur, rs)
-	response(w, rs)
+	server.SendData(w, rs)
 }
 
 //DELETE 删除角色

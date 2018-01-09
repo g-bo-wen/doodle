@@ -1,26 +1,26 @@
 <div class="toplink">
-    <div class="container">
-        <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
-        <span class="active" id="link_title">集群管理</span>
+    <div class="container" id="top_link">
     </div> 
 </div>
 <div class="container" >
-    <p>
-    <button type="button" class="btn btn-success" onclick="newModel()">新建集群</button>
+    <p id="admin_toolbar" style="display:none">
+    <button type="button" class="btn btn-success" onclick="newModel()">添加节点</button>
     </p>
     <table id="data_table"  
         data-toggle="table"
-        data-url="cluster/"
         data-pagination="true"
+        data-url="cluster/node/"
         data-side-pagination="client"
         data-sort-order="desc"
-        data-page-list="[10, 20, 50]"
+        data-row-style="rowStyle"
+        data-page-list="[10, 20, 50, 100, 200]"
+        data-query-params="queryParams"
         style="word-break:break-all; word-wrap:break-all;"
         >
         <thead>
             <tr>
-                <th data-field= 'Name' data-sortable="true"  data-formatter="nameFormatter">角色</th>
-                <th data-field= 'Comments' data-sortable="true">备注</th>
+                <th data-field= 'Server' data-sortable="true">节点</th>
+                <th data-field= 'Comment'>备注</th>
                 <th data-field= 'Mtime' data-sortable="true">时间</th>
                 <th data-formatter="actionFormatter" data-events="actionEvents">操作</th>
             </tr>
@@ -28,37 +28,26 @@
 
     </table>
 
+
     <div class="modal fade" id="model_dialog" style="z-index:2000">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    <h4 class="modal-title" id="modal_title">集群</h4>
+                    <h4 class="modal-title" id="modal_title">添加节点</h4>
                 </div>
                 <div class="modal-body" id="modal_content">
                     <form class="form-horizontal" role="form" id="model_form" >
                         <div class="control-group">
-                            <label class="control-label">名称</label>
+                            <label class="control-label">节点</label>
                             <div class="controls">
-                                <input type="text" class="form-control" id="name" name="name" maxlength="32" oninput="onInput()" value="" placeholder="集群名称, 中文, 必填" />
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">联系人</label>
-                            <div class="controls">
-                                <input type="text" class="form-control" id="user" name="user" value="" placeholder="联系人名称, 必填"/>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">邮箱</label>
-                            <div class="controls">
-                                <input type="text" class="form-control" id="email" name="email" value="" placeholder="联系人邮件地址, 必填"/>
+                                <input type="text" class="form-control" id="server" name="server" maxlength="32" oninput="onInput()" value="" placeholder="节点IP, 必填" />
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label">备注</label>
                             <div class="controls">
-                                <input type="text" maxlength="500" class="form-control" id="comments" name="comments" oninput="onInput()" value="" placeholder="备注信息，必填, 最多500字符">
+                                <input type="text" class="form-control" id="comment" name="comment" value="" placeholder="备注信息, 必填"/>
                             </div>
                         </div>
                     </form>
@@ -73,47 +62,41 @@
 </div>
 
 <script>
-    //添加关联列表的连接
-    function nameFormatter(value, row, index) {
-        return '<a href="?action=role&page=user&roleID='+row.RoleID+'" target="_parent">'+value+'</a> ';
-    }
+
+    var clusterID = requestParse("cluster_id");
+    var action = requestParse("action");
+    var projectID = requestParse("projectID");
+    var resourceID = requestParse("resourceID");
+    var roleInfo;
+
 
     //添加`操作`列对应事件
     function actionFormatter(value, row, index) {
-        if (account.IsAdmin || row.UserID == row.AdminID) {
-            return '<a class="edit glyphicon glyphicon-pencil" href="javascript:void(0)" title="修改"></a> &nbsp;&nbsp;' +
-            '<a class="delete glyphicon glyphicon-trash" href="javascript:void(0)" title="删除"></a>' ;
-        }
+        return '<a class="edit glyphicon glyphicon-pencil" href="javascript:void(0)" title="修改"></a>'+
+        '&nbsp;&nbsp;'+
+        '<a class="delete glyphicon glyphicon-trash" href="javascript:void(0)" title="删除"></a>' ;
     }
 
 
     var modifyID = 0;
     //显示修改应用对话框
     function modifyDialog(e, value, row, index) {
-        modifyID = row.RoleID;
-        $(".modal #name").val(row.RoleName);
-        $(".modal #user").val(row.UserName);
+        modifyID = row.UserID;
+        $(".modal #name").val(row.UserName);
         $(".modal #email").val(row.UserEmail);
-        $(".modal #comments").val(row.RoleComments);
-
-        if (account.IsAdmin) {
-            $(".modal #user").removeAttr("readonly");
-            $(".modal #email").removeAttr("readonly");
-            }else {
-            $(".modal #user").attr("readonly", "readonly");
-            $(".modal #email").attr("readonly", "readonly");
-        }
 
         $("#modal_title").html("修改角色信息");
         $("#model_dialog").modal('show');
     }
 
     var confirmID = 0;
+    var confirmEmail = "";
     //显示删除应用确认对话框
     function deleteDialog(e, value, row, index) {
-        confirmID = row.RoleID;
+        confirmID = row.ID;
+        confirmEmail = row.UserEmail;
         $("#confirm_modal_title").html("确认要删除以下内容？");
-        $("#confirm_modal_content").html("<h4>"+row.RoleName+"</h4>");
+        $("#confirm_modal_content").html("<h4>"+row.UserName+"</h4>");
         $("#confirm_dialog").modal('show');
     }
 
@@ -127,7 +110,7 @@
         $.ajax(
         {
             type: "DELETE",
-            url: "role/?id="+confirmID, 
+            url: "cluster/node/?id="+confirmID, 
             async: false,
             success: function(data,status) { 
                 if (data.Status != 0) {
@@ -156,40 +139,26 @@
     function newModel() {
         modifyID = 0;
         $(".modal #name").val("");
-        $(".modal #user").val(account.fullname);
-        $(".modal #email").val(account.email);
-        $(".modal #comments").val("");
+        $(".modal #email").val("");
 
-        if (account.IsAdmin) {
-            $(".modal #user").removeAttr("readonly");
-            $(".modal #email").removeAttr("readonly");
-        }
-        else {
-            $(".modal #user").attr("readonly", "readonly");
-            $(".modal #email").attr("readonly", "readonly");
-        }
-
-        $("#modal_title").html("新建角色");
+        $("#modal_title").html("添加节点");
         $("#model_dialog").modal('show');
     }
 
     //提交修改or添加的数据
     function submitModel() {
-        if(checkEmpty($("#name").val())) {
-            showMessage("名称不能为空");
-            return;
-        }
-        if(checkEmpty($("#comments").val())) {
-            showMessage("备注不能为空");
+        if(checkEmpty($(".modal #server").val())) {
+            showMessage("server 不能为空");
             return;
         }
 
-        url = "role/";
+        url = "cluster/node/?cluster_id=" + clusterID;
         method = "POST";
         if (modifyID != 0) {
-            url += "?role_id="+modifyID;
+            url += "&id="+modifyID;
             method = "PUT";
         }
+
         var data = $("#model_form").serialize(); 
         $.ajax(
         {
@@ -221,8 +190,75 @@
         'click .delete': deleteDialog,
     };
 
+    function queryParams(params) {
+        params.cluster_id = clusterID;
+        return params; 
+    }
+
+    function rowStyle(row, index) {
+        if (row.UserID == row.AdminID){
+            return { classes: 'success'};
+        }
+        //'active' 'success', 'info', 'warning', 'danger'
+        return {};
+    }
+
+    function initTopLink() {
+        if (action == "project") {
+            $("#top_link").html(
+            '<span class="glyphicon glyphicon-home" aria-hidden="true"></span>' +
+            '<a target="_parent" href="?action=project&page=project" >项目管理</a>' +
+            '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
+            '<a target="_parent" href="?action=project&page=interface&projectID='+projectID+'" >接口管理</a>' +
+            '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
+            '<a target="_parent" href="?action=project&page=resource&projectID='+projectID+'&resourceID='+resourceID+'" >权限管理</a>' +
+            '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
+            '<span class="active" id="link_title"></span>'
+            );
+        }
+        else {
+            $("#top_link").html(
+            '<span class="glyphicon glyphicon-home" aria-hidden="true"></span>' +
+            '<a target="_parent" href="?action=role&page=role" >权限管理</a>' +
+            '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
+            '<span class="active" id="link_title"></span>'
+            );
+        }
+    }
+
+
+    function loadClusterInfo() {
+        $.ajax({
+            type: "GET",
+            url: "cluster/info/?id="+clusterID,
+            async: false,
+            success: function(data,status) { 
+                if (data.Status != 0 ) {
+                    showMessage("<h3> loadClusterInfo error: "+data.Message+"</h3>");
+                    return;
+                }
+                roleInfo = data.Data;
+                $("#link_title").html(roleInfo.Name);
+                $(document).attr("title","接口平台 - "+roleInfo.Name);
+            },
+            error: function(req, data, error) { 
+                showMessage("<h3> call loadClusterInfo error:"+req.responseText+"</h3>");
+            },
+        });
+    }
+
+    function initToolbar() {
+        if (account.IsAdmin || roleInfo.AdminID == roleInfo.userID) {
+            $("#admin_toolbar").show();
+        }
+    }
+
 
     $(function (){
+        initTopLink();
+        loadClusterInfo();
+        initToolbar();
+
         $('#data_table').bootstrapTable('refreshOptions',{});
     })
 </script>

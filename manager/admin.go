@@ -18,6 +18,7 @@ type userDB struct {
 	admins *cache.Cache
 	res    *cache.Cache
 	uid    *cache.Cache
+	roles  *cache.Cache
 	sync.RWMutex
 }
 
@@ -26,6 +27,7 @@ func newUserDB() *userDB {
 		admins: cache.NewCache(int64(config.Manager.Cache.Timeout)),
 		res:    cache.NewCache(int64(config.Manager.Cache.Timeout)),
 		uid:    cache.NewCache(int64(config.Manager.Cache.Timeout)),
+		roles:  cache.NewCache(int64(config.Manager.Cache.Timeout)),
 	}
 }
 
@@ -77,35 +79,33 @@ func (u *userDB) isAdmin(email string) bool {
 }
 
 //loadResource 查找用户权限
-func (u *userDB) loadResource(i *userinfo) error {
+func (u *userDB) loadResource(email string) ([]int64, error) {
 	u.RLock()
-	if res := u.res.Get(i.Email); res != nil {
+	if res := u.res.Get(email); res != nil {
 		u.RUnlock()
-		log.Debugf("userinfo:%v, resource cache:%v", i, res.([]int64))
-		i.setResource(res.([]int64))
-		return nil
+		log.Debugf("user:%v, resource cache:%v", email, res.([]int64))
+		return res.([]int64), nil
 	}
 	u.RUnlock()
 
 	u.Lock()
 	defer u.Unlock()
 
-	if res := u.res.Get(i.Email); res != nil {
-		log.Debugf("userinfo:%v, resource cache:%v", i, res.([]int64))
-		i.setResource(res.([]int64))
-		return nil
+	if res := u.res.Get(email); res != nil {
+		log.Debugf("user:%v, resource cache:%v", email, res.([]int64))
+		return res.([]int64), nil
 	}
 
-	res, err := rbacClient.GetUserResourceIDs(i.Email)
+	res, err := rbacClient.GetUserResourceIDs(email)
 	if err != nil {
-		return errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
-	i.setResource(res)
-	log.Debugf("userinfo:%+v", *i)
-	return nil
+	u.res.Add(email, res)
+	log.Debugf("user:%v, res:%v", email, res)
+	return res, nil
 }
 
-// setResource 设置用户允许使用的资源列表
+// setResource 设置用户允许使用的资源列表.
 func (u *userinfo) setResource(res []int64) {
 	if u.Res = res; len(res) == 0 {
 		return
@@ -113,10 +113,24 @@ func (u *userinfo) setResource(res []int64) {
 
 	buf := bytes.NewBufferString("")
 	for _, id := range res {
-		buf.WriteString(fmt.Sprintf("%d,", id))
+		fmt.Fprintf(buf, "%d,", id)
 	}
 	buf.Truncate(buf.Len() - 1)
 	u.ResKey = buf.String()
+}
+
+// setRoles 设置用户角色列表.
+func (u *userinfo) setRoles(roles []int64) {
+	if u.Roles = roles; len(roles) == 0 {
+		return
+	}
+
+	buf := bytes.NewBufferString("")
+	for _, id := range roles {
+		fmt.Fprintf(buf, "%d,", id)
+	}
+	buf.Truncate(buf.Len() - 1)
+	u.RolesKey = buf.String()
 }
 
 //validate 权限验证
@@ -155,6 +169,44 @@ func (u *userDB) loadUserID(email string) (int64, error) {
 	if err != nil {
 		return 0, errors.Trace(err)
 	}
+
+	u.uid.Add(email, info.ID)
+
 	log.Debugf("rbac email:%s, user:%+v", email, info)
+
 	return info.ID, nil
+}
+
+//loadRoles 查找用户所有角色.
+func (u *userDB) loadRoles(email string) ([]int64, error) {
+	u.RLock()
+	if roles := u.roles.Get(email); roles != nil {
+		u.RUnlock()
+		log.Debugf("user:%v, roles cache:%v", email, roles.([]int64))
+		return roles.([]int64), nil
+	}
+	u.RUnlock()
+
+	u.Lock()
+	defer u.Unlock()
+
+	if roles := u.roles.Get(email); roles != nil {
+		log.Debugf("user:%v, roles cache:%v", email, roles.([]int64))
+		return roles.([]int64), nil
+	}
+
+	rs, err := rbacClient.GetUserRoles(email)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
+	var ids []int64
+	for _, r := range rs {
+		ids = append(ids, r.RoleID)
+	}
+	log.Debugf("email:%v, roles:%v", email, ids)
+
+	u.roles.Add(email, ids)
+
+	return ids, nil
 }

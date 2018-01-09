@@ -12,6 +12,8 @@ type userinfo struct {
 	IsAdmin   bool
 	Res       []int64
 	ResKey    string
+	Roles     []int64
+	RolesKey  string
 	Email     string `json:"email"`
 	Mobile    string `json:"mobile"`
 	HrmDeptID string `json:"hrmDeptId"`

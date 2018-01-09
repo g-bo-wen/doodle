@@ -55,6 +55,30 @@ func verifyTicket(r *http.Request, ticket string) (ssoResp, error) {
 	return sr, nil
 }
 
+func (u *userinfo) String() string {
+	return u.Email
+}
+
+//loadInfo 加载资源与角色信息.
+func (u *userinfo) loadInfo() error {
+	res, err := userdb.loadResource(u.Email)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	u.setResource(res)
+
+	roles, err := userdb.loadRoles(u.Email)
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	u.setRoles(roles)
+
+	u.IsAdmin = userdb.isAdmin(u.Email)
+
+	return nil
+}
+
 func (s *sessionDB) User(r *http.Request) (*userinfo, error) {
 	ticket, err := getTicket(r)
 	if err != nil {
@@ -64,10 +88,7 @@ func (s *sessionDB) User(r *http.Request) (*userinfo, error) {
 	val := s.cache.Get(ticket)
 	if val != nil {
 		i := val.(*userinfo)
-		if err = userdb.loadResource(i); err != nil {
-			return nil, errors.Trace(err)
-		}
-		return i, nil
+		return i, i.loadInfo()
 	}
 
 	resp, err := verifyTicket(r, ticket)
@@ -79,17 +100,12 @@ func (s *sessionDB) User(r *http.Request) (*userinfo, error) {
 		return nil, fmt.Errorf("invalid Flag, ticket:%+v", resp)
 	}
 
-	if err = userdb.loadResource(&resp.Data); err != nil {
+	i := &resp.Data
+	if err = i.loadInfo(); err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	if resp.Data.UserID, err = userdb.loadUserID(resp.Data.Email); err != nil {
-		return nil, errors.Trace(err)
-	}
+	s.cache.Add(ticket, i)
 
-	resp.Data.IsAdmin = userdb.isAdmin(resp.Data.Email)
-
-	s.cache.Add(ticket, &resp.Data)
-
-	return &resp.Data, nil
+	return i, nil
 }

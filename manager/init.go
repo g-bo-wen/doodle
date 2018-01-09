@@ -33,6 +33,10 @@ func ServerInit() error {
 	server.RegisterPath(&resourceInfo{}, "/resource/info")
 	server.RegisterPath(&resourceRole{}, "/resource/role/")
 
+	server.RegisterPath(&cluster{}, "/cluster/")
+	server.RegisterPath(&clusterInfo{}, "/cluster/info/")
+	server.RegisterPath(&clusterNode{}, "/cluster/node/")
+
 	server.RegisterPath(&role{}, "/role/")
 	server.RegisterPath(&roleUser{}, "/role/user/")
 	server.RegisterPath(&roleInfo{}, "/role/info/")
