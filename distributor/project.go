@@ -16,11 +16,11 @@ import (
 )
 
 type project struct {
-	ID     int64
-	Source string
-	Name   string
-	Deploy []deploy `db_table:"one2more"`
-	Ctime  string   `db_default:"now()"`
+	ID      int64
+	Source  string
+	Name    string
+	Cluster cluster `db_table:"one"`
+	Ctime   string  `db_default:"now()"`
 }
 
 //GET 获取project的部署情况.

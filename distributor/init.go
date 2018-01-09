@@ -21,7 +21,6 @@ func ServerInit(confPath string) error {
 	mdb = orm.NewDB(config.Distributor.DB.IP, config.Distributor.DB.Port, config.Distributor.DB.Name, config.Distributor.DB.User, config.Distributor.DB.Passwd, config.Distributor.DB.Charset, 10)
 
 	server.RegisterPath(&distributor{}, "/distributor/")
-	server.RegisterPath(&deploy{}, "/deploy/")
 
 	w, err := newWatcher()
 	if err != nil {

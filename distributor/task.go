@@ -58,7 +58,7 @@ func newTask(projectID int64) (*task, error) {
 		return nil, errors.Trace(err)
 	}
 
-	if err = orm.NewStmt(db, "project").Where("id=%v", projectID).Query(&p); err != nil {
+	if err = orm.NewStmt(db, "project").Where("project.id=%v", projectID).Query(&p); err != nil {
 		return nil, errors.Trace(err)
 	}
 	log.Debugf("project:%#v", p)
@@ -195,8 +195,11 @@ func (t *task) install() error {
 
 	cmd = fmt.Sprintf("hostname; tar xzf %s; killall %v; nohup ./%v -etcd 192.168.180.104:12379,192.168.180.104:22379,192.168.180.104:32379 -h : > %v.log 2>&1 &", tarFile, t.project.Name, t.project.Name, t.project.Name)
 
-	for _, d := range t.project.Deploy {
-		sc := ssh.NewClient(d.Server, 22, "root", "1qaz@WSX")
+	for _, n := range t.project.Cluster.Node {
+		sc, err := ssh.NewClient(n.Server, 22, "jeduser", "", config.Distributor.SSH.Key)
+		if err != nil {
+			return errors.Trace(err)
+		}
 		log.Debugf("%v begin, upload file:%v", t, tarFile)
 		if err = sc.Upload(tarFile, tarFile); err != nil {
 			return errors.Trace(err)
@@ -208,7 +211,7 @@ func (t *task) install() error {
 			return errors.Annotatef(err, cmd)
 		}
 		log.Debugf("%v end, ssh exec:%v", t, cmd)
-		log.Debugf("%v deploy %s success", t, d.Server)
+		log.Debugf("%v deploy %s success", t, n.Server)
 	}
 	t.wg.Wait()
 

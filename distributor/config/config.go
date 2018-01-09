@@ -17,6 +17,10 @@ type serverConfig struct {
 	SecretKey string
 }
 
+type sshConfig struct {
+	Key string
+}
+
 type dbConfig struct {
 	IP      string
 	Port    int
@@ -39,6 +43,7 @@ type distributorConfig struct {
 	DB      dbConfig
 	ETCD    etcdConfig
 	Manager managerConfig
+	SSH     sshConfig
 }
 
 //Load 加载配置文件.

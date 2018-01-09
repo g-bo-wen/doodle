@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
@@ -17,29 +18,46 @@ import (
 //Client ssh客户端，支持scp的.
 type Client struct {
 	server string
-	user   string
-	passwd string
-	config ssh.ClientConfig
+	conn   *ssh.Client
 }
 
 //NewClient 创建ssh客户端.
-func NewClient(host string, port int, user, passwd string) *Client {
-	return &Client{
-		server: fmt.Sprintf("%s:%d", host, port),
-		user:   user,
-		passwd: passwd,
-		config: ssh.ClientConfig{
-			User: user,
-			Auth: []ssh.AuthMethod{
-				ssh.Password(passwd),
-			},
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		},
+func NewClient(host string, port int, user, passwd, keyFile string) (*Client, error) {
+	conf := ssh.ClientConfig{
+		User:            user,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
+
+	if passwd != "" {
+		conf.Auth = []ssh.AuthMethod{ssh.Password(passwd)}
+	}
+
+	if keyFile != "" {
+		key, err := ioutil.ReadFile(keyFile)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		signer, err := ssh.ParsePrivateKey(key)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+
+		conf.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+	}
+
+	server := fmt.Sprintf("%s:%d", host, port)
+
+	conn, err := ssh.Dial("tcp", server, &conf)
+	if err != nil {
+		return nil, errors.Annotatef(err, server)
+	}
+
+	return &Client{conn: conn, server: server}, nil
 }
 
 //Exec 执行命令并等待返回结果.
-func (s *Client) Exec(cmd string) (string, error) {
+func (c *Client) Exec(cmd string) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			buf := make([]byte, 1<<16)
@@ -50,16 +68,9 @@ func (s *Client) Exec(cmd string) (string, error) {
 		}
 	}()
 
-	client, err := ssh.Dial("tcp", s.server, &s.config)
+	session, err := c.conn.NewSession()
 	if err != nil {
-		return "", errors.Annotatef(err, s.server)
-	}
-
-	defer client.Close()
-
-	session, err := client.NewSession()
-	if err != nil {
-		return "", errors.Annotatef(err, s.server)
+		return "", errors.Annotatef(err, c.server)
 	}
 	defer session.Close()
 
@@ -76,7 +87,7 @@ func (s *Client) Exec(cmd string) (string, error) {
 }
 
 //ExecPipe 执行命令并设置输出流.
-func (s *Client) ExecPipe(cmdStr string, setPipe func(stdOut, stdErr io.Reader)) error {
+func (c *Client) ExecPipe(cmdStr string, setPipe func(stdOut, stdErr io.Reader)) error {
 	defer func() {
 		if err := recover(); err != nil {
 			buf := make([]byte, 1<<16)
@@ -87,16 +98,9 @@ func (s *Client) ExecPipe(cmdStr string, setPipe func(stdOut, stdErr io.Reader))
 		}
 	}()
 
-	client, err := ssh.Dial("tcp", s.server, &s.config)
+	session, err := c.conn.NewSession()
 	if err != nil {
-		return errors.Annotatef(err, s.server)
-	}
-
-	defer client.Close()
-
-	session, err := client.NewSession()
-	if err != nil {
-		return errors.Annotatef(err, s.server)
+		return errors.Annotatef(err, c.server)
 	}
 	defer session.Close()
 
@@ -116,12 +120,8 @@ func (s *Client) ExecPipe(cmdStr string, setPipe func(stdOut, stdErr io.Reader))
 }
 
 //Upload 上传文件.
-func (s *Client) Upload(src, dest string) error {
-	conn, err := ssh.Dial("tcp", s.server, &s.config)
-	if err != nil {
-		return errors.Annotatef(err, s.server)
-	}
-	sftp, err := sftp.NewClient(conn)
+func (c *Client) Upload(src, dest string) error {
+	sftp, err := sftp.NewClient(c.conn)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -149,7 +149,7 @@ func (s *Client) Upload(src, dest string) error {
 	}
 
 	cmd := fmt.Sprintf("chmod %o %v", st.Mode(), dest)
-	if _, err = s.Exec(cmd); err != nil {
+	if _, err = c.Exec(cmd); err != nil {
 		return errors.Annotatef(err, "cmd:%v", cmd)
 	}
 

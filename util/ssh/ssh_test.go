@@ -1,52 +1,51 @@
 package ssh
 
 import (
-	"bufio"
-	"fmt"
-	"io"
+	"bytes"
 	"io/ioutil"
 	"testing"
+
+	"golang.org/x/crypto/ssh"
 )
 
-func writeLogStream(reader io.ReadCloser) {
-	r := bufio.NewReader(reader)
-	for {
-		line, _, err := r.ReadLine()
-		fmt.Printf("line:%s, err:%v\n", line, err)
-		if err != nil {
-			if err == io.EOF {
-				return
-			}
-			fmt.Printf("read error:%v\n", err)
-			return
-		}
-	}
-}
+func TestPublicKeys(t *testing.T) {
+	//	var hostKey ssh.PublicKey
 
-func writeLogs(pid int, stdOut, stdErr io.ReadCloser) {
-	go writeLogStream(stdOut)
-	go writeLogStream(stdErr)
-}
-
-func writeSSHLogs(stdOut, stdErr io.Reader) {
-
-	writeLogs(0, ioutil.NopCloser(stdOut), ioutil.NopCloser(stdErr))
-}
-
-func TestExecPipe(t *testing.T) {
-	sc := NewSSHClient("192.168.180.104", 22, "root", "1qaz@WSX")
-	if err := sc.ExecPipe("hostname", writeSSHLogs); err != nil {
-		t.Fatalf(err.Error())
-	}
-}
-
-func TestUpload(t *testing.T) {
-	src := "/home/tian/work/bin/bee"
-	dest := "dbfree"
-
-	sc := NewSSHClient("192.168.180.104", 22, "root", "1qaz@WSX")
-	if err := sc.Upload(src, dest); err != nil {
-		t.Fatalf(err.Error())
+	key, err := ioutil.ReadFile("/home/tian/.ssh/id_rsa_38")
+	if err != nil {
+		t.Fatalf("unable to read private key: %v", err)
 	}
 
+	signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		t.Fatalf("unable to parse private key: %v", err)
+	}
+
+	config := &ssh.ClientConfig{
+		User: "root",
+		Auth: []ssh.AuthMethod{
+			ssh.PublicKeys(signer),
+		},
+		//		HostKeyCallback: ssh.FixedHostKey(hostKey),
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	client, err := ssh.Dial("tcp", "192.168.177.208:22", config)
+	if err != nil {
+		t.Fatalf("unable to connect: %v", err)
+	}
+	defer client.Close()
+
+	s, err := client.NewSession()
+	if err != nil {
+		t.Fatalf("NewSession error:%v", err)
+	}
+	var bufErr, bufOut bytes.Buffer
+	s.Stdout = &bufOut
+	s.Stderr = &bufErr
+	if err = s.Run("hostname"); err != nil {
+		t.Fatalf("Run error:%v", err)
+	}
+
+	t.Logf("out:%v, err:%v", bufOut.String(), bufErr.String())
 }
