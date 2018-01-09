@@ -74,7 +74,10 @@
 
     //添加`操作`列对应事件
     function actionFormatter(value, row, index) {
-        if (account.IsAdmin || roleInfo.AdminID == roleInfo.UserID) {
+        if (row.UserID == row.AdminID) {
+            return ""
+        }
+        if (account.IsAdmin || roleInfo.AdminID == roleInfo.userID) {
             return '<a class="edit glyphicon glyphicon-pencil" href="javascript:void(0)" title="修改"></a>'+
             '&nbsp;&nbsp;'+
             '<a class="delete glyphicon glyphicon-trash" href="javascript:void(0)" title="删除"></a>' ;
@@ -245,8 +248,8 @@
                     return;
                 }
                 roleInfo = data.Data;
-                $("#link_title").html(roleInfo.RoleName);
-                $(document).attr("title","接口平台 - "+roleInfo.RoleName);
+                $("#link_title").html(roleInfo.Name);
+                $(document).attr("title","接口平台 - "+roleInfo.Name);
             },
             error: function(req, data, error) { 
                 showMessage("<h3> call loadRoleInfo error:"+req.responseText+"</h3>");
@@ -255,7 +258,7 @@
     }
 
     function initToolbar() {
-        if (account.IsAdmin || roleInfo.AdminID == roleInfo.UserID) {
+        if (account.IsAdmin || roleInfo.AdminID == roleInfo.userID) {
             $("#admin_toolbar").show();
         }
     }

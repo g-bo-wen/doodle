@@ -461,7 +461,7 @@ func (c Client) PostUser(user, email string) (int64, error) {
 // PutUser 更新用户信息.
 func (c Client) PutUser(userID int64, user, email string) error {
 	url := fmt.Sprintf("http://%s/rbac/user/?user_id=%v&name=%s&email=%s", c.host, userID, user, email)
-	buf, err := c.post(url, nil)
+	buf, err := c.put(url, nil)
 	if err != nil {
 		log.Infof("Put:%v error:%v", url, err)
 		return errors.Trace(err)
