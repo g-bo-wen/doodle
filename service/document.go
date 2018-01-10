@@ -325,7 +325,7 @@ func getExportComment(name, url, method string) string {
 	//url:git.jd.com/dbs/faas_test_001/user/Logout/ method:Post
 	//git.jd.com/dbs/faas_test_001/user.Logout.Post
 	key := url[:len(url)-len(name)-2]
-	key = debug.Project + url + "." + name + "." + method
+	key = debug.Project + key + "." + name + "." + method
 	log.Debugf("project:%v, name:%v, url:%v, method:%v, key:%v", debug.Project, name, url, method, key)
 	return docExport[key]
 }
