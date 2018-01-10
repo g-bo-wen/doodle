@@ -151,15 +151,19 @@
         $(".modal #user").val(row.user);
         $(".modal #email").val(row.email);
         $(".modal #path").val(row.path);
-
-        if (row.version == "1") {
-            $(".modal #version").find("option[value='0']").attr("selected",false);
-            $(".modal #version").find("option[value='1']").attr("selected",true);
+        $(".modal #version").val(row.version);
+        /*if (row.version == "1") {
+            $(".modal #version").find("option[text='1.0 (Proxy模式)']").attr("selected",false);
+            $(".modal #version").find("option[text='2.0 (Faas模式)']").attr("selected",true);
+            // $(".modal #version").find("option[value='0']").attr("selected",false);
+            // $(".modal #version").find("option[value='1']").attr("selected",true);
         }
         else {
-            $(".modal #version").find("option[value='1']").attr("selected",false);
-            $(".modal #version").find("option[value='0']").attr("selected",true);
-        }
+            // $(".modal #version").find("option[text='1.0 (Proxy模式)']").attr("selected",true);
+            // $(".modal #version").find("option[text='2.0 (Faas模式)']").attr("selected",false);
+            // $(".modal #version").find("option[value='1']").attr("selected",false);
+            // $(".modal #version").find("option[value='0']").attr("selected",true);
+        }*/
 
         onVersionChange();
 
