@@ -16,27 +16,9 @@ const (
     <html>
     <head>
     <style type="text/css">
-    table {
-        color:#333333;
-        border-width: 1px;
-        border-color: #666666;
-        border-collapse: collapse;
-    }
-    table th {
-        border-width: 1px;
-        padding: 5px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #dedede;
-    }
-
-    table td {
-        border-width: 1px;
-        padding: 5px;
-        border-style: solid;
-        border-color: #666666;
-        background-color: #ffffff;
-    }
+    table { color:#333333; border-width: 1px; border-color: #666666; border-collapse: collapse; }
+    table th { border-width: 1px; padding: 5px; border-style: solid; border-color: #666666; background-color: #dedede; }
+    table td { border-width: 1px; padding: 5px; border-style: solid; border-color: #666666; background-color: #ffffff; }
     </style>
     </head>
     <body>
@@ -44,6 +26,7 @@ const (
     {{ range .Methods }}
 
     <p> <b>URL:</b> {{ .URL }} </p>
+    <p> <b>说明:</b> {{ .Comment }} </p>
     <p> <b>方法:</b> {{ .Method }} </p>
 
     <p> <b>请求参数:</b>
@@ -71,6 +54,10 @@ const (
     </html>`
 )
 
+var (
+	docExport = make(map[string]string)
+)
+
 type docView struct {
 	Methods []docViewMethod
 }
@@ -79,6 +66,7 @@ type docViewMethod struct {
 	Name     string
 	URL      string
 	Method   string
+	Comment  string
 	Request  []docViewField
 	Response []docViewField
 }
@@ -99,9 +87,10 @@ func newDocView(doc document) docView {
 	for mk, mv := range doc.Modules {
 		for mmk, mmv := range mv.Methods {
 			dvm := docViewMethod{
-				Name:   mk,
-				Method: mmk,
-				URL:    mv.URL,
+				Name:    mk,
+				Method:  mmk,
+				URL:     mv.URL,
+				Comment: mmv.Comment,
 			}
 
 			for _, rf := range mmv.Request {
@@ -188,6 +177,7 @@ type field struct {
 }
 
 type method struct {
+	Comment  string
 	Request  map[string]*field
 	Response map[string]*field
 }
@@ -213,7 +203,12 @@ func (d *document) add(name, url string, rm reflect.Method) {
 
 	m, ok := md.Methods[rm.Name]
 	if !ok {
-		m = &method{Request: make(map[string]*field), Response: make(map[string]*field)}
+		log.Debugf("name:%v, url:%v, rm:%#v", name, url, rm)
+		m = &method{
+			Comment:  getExportComment(name, url, rm.Name),
+			Request:  make(map[string]*field),
+			Response: make(map[string]*field),
+		}
 		md.Methods[rm.Name] = m
 	}
 
@@ -321,4 +316,16 @@ func newField(sf reflect.StructField) *field {
 		f.Child[sf.Name] = nf
 	}
 	return f
+}
+
+//getExportComment 根据go doc生成的函数注释查询.
+func getExportComment(name, url, method string) string {
+	//url:git.jd.com/dbs/faas_test_001/user/Logout/ method:Post
+	//git.jd.com/dbs/faas_test_001/user.Logout.Post
+	key := url[:len(url)-len(name)-2]
+	key += "." + name + "." + method
+	log.Debugf("name:%v, url:%v, method:%v, key:%v", name, url, method, key)
+	return docExport[key]
+	//s, ok := docExport[key]
+	//return s, ok
 }

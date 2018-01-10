@@ -113,6 +113,7 @@ func (s *Service) Register(obj interface{}) error {
 func (s *Service) Start() {
 	s.docView = newDocView(s.doc)
 	server.RegisterPath(&s.docView, "/doc/")
+
 	//第一步，启动服务
 	ln, err := server.Start(*host)
 	if err != nil {

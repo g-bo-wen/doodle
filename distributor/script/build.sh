@@ -2,6 +2,8 @@
 
 set -e
 
+IFS=$'\n'
+
 url=$1
 key=$2
 
@@ -39,6 +41,41 @@ function clone_source() {
     cd -;
 }
 
+function generate_document() {
+    export GOPATH=`pwd`
+    echo $GOPATH
+    cd $base_path;
+    document_file="vendor/$framework_package/generate_document.go"
+
+    printf "package service\n\n\n" > $document_file
+    printf "//init 导出的函数\n" >> $document_file
+    printf "func init() { \n" >> $document_file
+
+    for pkg in `go list ./...`
+    do
+        #   echo "package:" $pkg
+        for struct in `go doc -u $pkg|awk '/^type /{print $2}'`
+        do
+            structKey=$pkg.$struct
+            # echo "struct: $structKey"
+            for m in `go doc -u $structKey|awk -F'[ |(]' '/^func /{print $5}'`
+            do
+                methodKey=$structKey.$m
+                # echo "method: $methodKey" 
+                comment=`go doc $methodKey|sed 1d`
+                #           echo $comment
+                echo "docExport[\"$methodKey\"] = \`$comment\`" >> $document_file
+            done
+        done
+    done
+
+    echo "}" >> $document_file;
+
+    go fmt $document_file;
+
+    cd -;
+}
+
 function create_dockerfile() {
     project=`echo $url|sed 's/.*@//'|sed 's/\.git//'|sed 's/:/\//'`;
     package_in_vendor="$project/vendor/$framework_package"
@@ -65,6 +102,8 @@ convert_url
 create_path
 
 clone_source
+
+generate_document
 
 create_dockerfile
 
