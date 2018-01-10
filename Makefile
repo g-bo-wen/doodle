@@ -18,10 +18,10 @@ golint:
 	go get github.com/golang/lint/golint
 
 init:
-	if [[ -d _vendor ]]; then mv _vendor vendor; fi
+	if [ -d _vendor ]; then mv _vendor vendor; fi
 
 deinit:
-	if [[ -d vendor ]]; then mv vendor _vendor; fi
+	if [ -d vendor ]; then mv vendor _vendor; fi
 
 lint: golint
 	for path in $(source); do golint "$$path..."; done;

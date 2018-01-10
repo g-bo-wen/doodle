@@ -107,7 +107,7 @@ func (c *cluster) POST(w http.ResponseWriter, r *http.Request) {
 
 func (c *cluster) DELETE(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
-		ID string `json:"id"`
+		ID int64 `json:"id"`
 	}{}
 
 	u, err := session.User(r)
