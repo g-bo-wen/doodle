@@ -43,7 +43,7 @@ function clone_source() {
 
 function generate_document() {
     export GOPATH=`pwd`
-    echo $GOPATH
+    #echo $GOPATH
     cd $base_path;
     document_file="vendor/$framework_package/generate_document.go"
 

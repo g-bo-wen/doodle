@@ -9,6 +9,8 @@ import (
 
 	"github.com/dearcode/crab/http/server"
 	"github.com/zssky/log"
+
+	"github.com/dearcode/doodle/service/debug"
 )
 
 const (
@@ -323,9 +325,7 @@ func getExportComment(name, url, method string) string {
 	//url:git.jd.com/dbs/faas_test_001/user/Logout/ method:Post
 	//git.jd.com/dbs/faas_test_001/user.Logout.Post
 	key := url[:len(url)-len(name)-2]
-	key += "." + name + "." + method
-	log.Debugf("name:%v, url:%v, method:%v, key:%v", name, url, method, key)
+	key = debug.Project + url + "." + name + "." + method
+	log.Debugf("project:%v, name:%v, url:%v, method:%v, key:%v", debug.Project, name, url, method, key)
 	return docExport[key]
-	//s, ok := docExport[key]
-	//return s, ok
 }
