@@ -140,7 +140,7 @@ func (p *project) POST(w http.ResponseWriter, r *http.Request) {
 		vars.User = u.User
 	}
 
-	resID, err := rbacClient.PostResource(vars.Name, vars.Comments)
+	resID, err := rbacClient.PostResource(vars.Name, vars.Comment)
 	if err != nil {
 		log.Errorf("ResourceAdd req:%+v, error:%s", r, errors.ErrorStack(err))
 		util.SendResponse(w, http.StatusInternalServerError, "添加资源出错")
@@ -188,14 +188,14 @@ func (p *project) POST(w http.ResponseWriter, r *http.Request) {
 
 func (p *project) PUT(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
-		ID       int64  `json:"id" valid:"Required"`
-		Name     string `json:"name"  valid:"Required"`
-		User     string `json:"user"  valid:"Required"`
-		Email    string `json:"email"  valid:"Email"`
-		Path     string `json:"path"  valid:"AlphaNumeric"`
-		Source   string `json:"source"`
-		Version  int    `json:"version"`
-		Comments string `json:"comments"  valid:"Required"`
+		ID      int64  `json:"id" valid:"Required"`
+		Name    string `json:"name"  valid:"Required"`
+		User    string `json:"user"  valid:"Required"`
+		Email   string `json:"email"  valid:"Email"`
+		Path    string `json:"path"  valid:"AlphaNumeric"`
+		Source  string `json:"source"`
+		Version int    `json:"version"`
+		Comment string `json:"comment"  valid:"Required"`
 	}{}
 	u, err := session.User(r)
 	if err != nil {
@@ -214,7 +214,7 @@ func (p *project) PUT(w http.ResponseWriter, r *http.Request) {
 		vars.User = u.User
 	}
 
-	if err := updateProject(vars.ID, vars.Name, vars.User, vars.Email, vars.Path, vars.Comments, vars.Source, vars.Version); err != nil {
+	if err := updateProject(vars.ID, vars.Name, vars.User, vars.Email, vars.Path, vars.Comment, vars.Source, vars.Version); err != nil {
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}

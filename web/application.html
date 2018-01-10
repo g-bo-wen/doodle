@@ -22,7 +22,7 @@
                 <th data-field= 'Name' data-sortable="true"  data-formatter="nameFormatter">名称</th>
                 <th data-field= 'User' data-sortable="true">联系人</th>
                 <th data-field= 'Email' data-sortable="true">邮箱</th>
-                <th data-field= 'Comments' data-sortable="true">备注</th>
+                <th data-field= 'Comment' data-sortable="true">备注</th>
                 <th data-field= 'Mtime' data-sortable="true">时间</th>
                 <th data-formatter="actionFormatter" data-events="actionEvents">操作</th>
             </tr>
@@ -61,7 +61,7 @@
                         <div class="control-group">
                             <label class="control-label">备注</label>
                             <div class="controls">
-                                <input type="text" maxlength="500" class="form-control" id="comments" name="comments" oninput="onInput" value="" placeholder="备注信息，必填, 最多500字符">
+                                <input type="text" maxlength="500" class="form-control" id="comment" name="comment" oninput="onInput" value="" placeholder="备注信息，必填, 最多500字符">
                             </div>
                         </div>
                     </form>
@@ -99,7 +99,7 @@
         $(".modal #name").val(row.Name);
         $(".modal #user").val(row.User);
         $(".modal #email").val(row.Email);
-        $(".modal #comments").val(row.Comments);
+        $(".modal #comment").val(row.Comment);
 
         if (account.IsAdmin) {
             $(".modal #user").removeAttr("readonly");
@@ -158,7 +158,7 @@
         $(".modal #name").val("");
         $(".modal #user").val(account.fullname);
         $(".modal #email").val(account.email);
-        $(".modal #comments").val("");
+        $(".modal #comment").val("");
 
         if (account.IsAdmin) {
             $(".modal #user").removeAttr("readonly");
@@ -178,7 +178,7 @@
 		showMessage("名称不能为空");
 		return;
 	}
-	if(checkEmpty($("#comments").val())) {
+	if(checkEmpty($("#comment").val())) {
 		showMessage("备注不能为空");
 		return;
 	}
@@ -202,7 +202,7 @@
                     $('#data_table').bootstrapTable('refreshOptions',{pageNumber: 1,offset:0});
                     $("#name").val("");
                     $("#path").val("");
-                    $("#comments").val("");
+                    $("#comment").val("");
                     }else {
                     showMessage("<h3>失败:"+data.Message+"</h3>");
                 }

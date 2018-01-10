@@ -91,7 +91,7 @@ func (w *watcher) load() error {
 type managerClient struct {
 }
 
-func (mc *managerClient) interfaceRegister(projectID int64, name, method, path, backend string) error {
+func (mc *managerClient) interfaceRegister(projectID int64, name, method, path, backend, comment string) error {
 	url := fmt.Sprintf("%sinterface/register/", config.Distributor.Manager.URL)
 	req := struct {
 		Name      string
@@ -99,12 +99,14 @@ func (mc *managerClient) interfaceRegister(projectID int64, name, method, path, 
 		Path      string
 		Method    server.Method
 		Backend   string
+		Comment   string
 	}{
 		Name:      name,
 		ProjectID: projectID,
 		Path:      path,
 		Backend:   backend,
 		Method:    server.NewMethod(method),
+		Comment:   comment,
 	}
 
 	resp := struct {
@@ -138,7 +140,9 @@ type docField struct {
 }
 
 type docMethod struct {
-	Request map[string]docField
+	Comment  string
+	Request  map[string]docField
+	Response map[string]docField
 }
 
 type docObject struct {
@@ -154,6 +158,7 @@ func (w *watcher) parseDocument(backend string, app meta.MicroAPP) error {
 	}
 
 	var doc map[string]docObject
+	log.Debugf("source:%s", buf)
 
 	if err = json.Unmarshal(buf, &doc); err != nil {
 		log.Errorf("Unmarshal doc:%s error:%v", buf, err)
@@ -169,10 +174,9 @@ func (w *watcher) parseDocument(backend string, app meta.MicroAPP) error {
 	}
 
 	mc := managerClient{}
-
 	for ok, ov := range doc {
-		for mk := range ov.Methods {
-			mc.interfaceRegister(projectID, ok+"_"+mk, mk, ov.URL, backend)
+		for mk, mv := range ov.Methods {
+			mc.interfaceRegister(projectID, ok+"_"+mk, mk, ov.URL, backend, mv.Comment)
 		}
 	}
 

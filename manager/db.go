@@ -115,20 +115,20 @@ func query(table, where, sort, order string, offset, count int, result interface
 	return count, nil
 }
 
-func updateProject(id int64, name, user, email, path, comments, source string, version int) error {
-	sql := "update project set name=?, user=?, email=?, path=?, comments=?, mtime=now(),source=?,version=? where id=?"
+func updateProject(id int64, name, user, email, path, comment, source string, version int) error {
+	sql := "update project set name=?, user=?, email=?, path=?, comment=?, mtime=now(),source=?,version=? where id=?"
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return errors.Trace(err)
 	}
 	defer db.Close()
 
-	_, err = db.Exec(sql, name, user, email, path, comments, source, version, id)
+	_, err = db.Exec(sql, name, user, email, path, comment, source, version, id)
 	return errors.Trace(err)
 }
 
 func queryInterfaceInfo(id int64) (meta.Interface, error) {
-	sql := "select name, user, email, state, method, level, path, backend, comments, ctime, mtime from interface where id=?"
+	sql := "select name, user, email, state, method, level, path, backend, comment, ctime, mtime from interface where id=?"
 
 	db, err := mdb.GetConnection()
 	if err != nil {
@@ -146,7 +146,7 @@ func queryInterfaceInfo(id int64) (meta.Interface, error) {
 	}
 
 	i := meta.Interface{}
-	if err = rows.Scan(&i.Name, &i.User, &i.Email, &i.State, &i.Method, &i.Level, &i.Path, &i.Backend, &i.Comments, &i.Ctime, &i.Mtime); err != nil {
+	if err = rows.Scan(&i.Name, &i.User, &i.Email, &i.State, &i.Method, &i.Level, &i.Path, &i.Backend, &i.Comment, &i.Ctime, &i.Mtime); err != nil {
 		return meta.Interface{}, errors.Trace(err)
 	}
 
@@ -164,31 +164,31 @@ func deployInterface(id int64) error {
 	return errors.Trace(err)
 }
 
-func updateInterface(id int64, method, level int, name, path, backend, comments, user, email string) error {
-	sql := "update interface set name=?, method=?,level=?, path=?, backend=?, comments=?, mtime=now(), user=?, email=? where id=?"
+func updateInterface(id int64, method, level int, name, path, backend, comment, user, email string) error {
+	sql := "update interface set name=?, method=?,level=?, path=?, backend=?, comment=?, mtime=now(), user=?, email=? where id=?"
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return errors.Trace(err)
 	}
 	defer db.Close()
-	_, err = db.Exec(sql, name, method, level, path, backend, comments, user, email, id)
+	_, err = db.Exec(sql, name, method, level, path, backend, comment, user, email, id)
 	return errors.Trace(err)
 }
 
-func updateVariable(id int64, postion int, name string, isNumber, isRequired int, example, comments string) error {
-	sql := "update variable set postion=?, name =?, is_number=?, is_required=?, example=?, comments=?, mtime=now() where id=?"
+func updateVariable(id int64, postion int, name string, isNumber, isRequired int, example, comment string) error {
+	sql := "update variable set postion=?, name =?, is_number=?, is_required=?, example=?, comment=?, mtime=now() where id=?"
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return errors.Trace(err)
 	}
 	defer db.Close()
-	_, err = db.Exec(sql, postion, name, isNumber, isRequired, example, comments, id)
+	_, err = db.Exec(sql, postion, name, isNumber, isRequired, example, comment, id)
 	return errors.Trace(err)
 }
 
 func getApp(id int64) (meta.Application, error) {
 	p := meta.Application{}
-	sql := "select name, token, comments, ctime, mtime from application where id=?"
+	sql := "select name, token, comment, ctime, mtime from application where id=?"
 
 	db, err := mdb.GetConnection()
 	if err != nil {
@@ -204,7 +204,7 @@ func getApp(id int64) (meta.Application, error) {
 	if !rows.Next() {
 		return p, fmt.Errorf("app %d not found", id)
 	}
-	if err = rows.Scan(&p.Name, &p.Token, &p.Comments, &p.Ctime, &p.Mtime); err != nil {
+	if err = rows.Scan(&p.Name, &p.Token, &p.Comment, &p.Ctime, &p.Mtime); err != nil {
 		return p, errors.Trace(err)
 	}
 	p.ID = id
@@ -275,15 +275,15 @@ func add(table string, data interface{}) (int64, error) {
 	return r.LastInsertId()
 }
 
-func updateApp(where, name, user, email, comments string) error {
-	sql := "update application set name=?, user=?, email=?, comments=?, mtime=now() where " + where
+func updateApp(where, name, user, email, comment string) error {
+	sql := "update application set name=?, user=?, email=?, comment=?, mtime=now() where " + where
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return errors.Trace(err)
 	}
 	defer db.Close()
 
-	_, err = db.Exec(sql, name, user, email, comments)
+	_, err = db.Exec(sql, name, user, email, comment)
 	return errors.Trace(err)
 }
 

@@ -97,7 +97,7 @@ type iface struct {
 	State     int
 	Path      string `json:"path"  valid:"AlphaNumeric"`
 	Backend   string `json:"backend"  valid:"Required"`
-	Comments  string `json:"comments"  valid:"Required"`
+	Comment   string `json:"comment"  valid:"Required"`
 	Level     int    `json:"level"`
 	CTime     string `db_default:"now()"`
 	Mtime     string `db_default:"now()"`

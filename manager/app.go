@@ -112,12 +112,12 @@ func (ai *appInfo) GET(w http.ResponseWriter, r *http.Request) {
 }
 
 type app struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	User     string `json:"user"`
-	Comments string `json:"comments"`
-	CTime    string `db_default:"now()"`
-	Mtime    string `db_default:"now()"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	User    string `json:"user"`
+	Comment string `json:"comment"`
+	CTime   string `db_default:"now()"`
+	Mtime   string `db_default:"now()"`
 }
 
 func (a *app) GET(w http.ResponseWriter, r *http.Request) {
@@ -266,11 +266,11 @@ func (a *app) POST(w http.ResponseWriter, r *http.Request) {
 
 func (a *app) PUT(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
-		ID       int64  `json:"id" valid:"Required"`
-		Name     string `json:"name"  valid:"Required"`
-		User     string `json:"user"  valid:"Required"`
-		Email    string `json:"email" valid:"Email"`
-		Comments string `json:"comments"  valid:"Required"`
+		ID      int64  `json:"id" valid:"Required"`
+		Name    string `json:"name"  valid:"Required"`
+		User    string `json:"user"  valid:"Required"`
+		Email   string `json:"email" valid:"Email"`
+		Comment string `json:"comment"  valid:"Required"`
 	}{}
 	u, err := session.User(r)
 	if err != nil {
@@ -293,7 +293,7 @@ func (a *app) PUT(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := updateApp(fmt.Sprintf("id=%d", vars.ID), vars.Name, vars.User, vars.Email, vars.Comments); err != nil {
+	if err := updateApp(fmt.Sprintf("id=%d", vars.ID), vars.Name, vars.User, vars.Email, vars.Comment); err != nil {
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}

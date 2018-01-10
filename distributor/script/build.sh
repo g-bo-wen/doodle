@@ -63,7 +63,7 @@ function generate_document() {
                 methodKey=$structKey.$m
                 # echo "method: $methodKey" 
                 comment=`go doc $methodKey|sed 1d`
-                #           echo $comment
+                echo $comment
                 echo "docExport[\"$methodKey\"] = \`$comment\`" >> $document_file
             done
         done

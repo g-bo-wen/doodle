@@ -35,7 +35,7 @@
                 <th data-field='IsNumber' data-sortable="true">类型</th>
                 <th data-field='IsRequired' data-sortable="true">必填</th>
                 <th data-field='Example' data-sortable="true">示例</th>
-                <th data-field='Comments' data-sortable="true">备注</th>
+                <th data-field='Comment' data-sortable="true">备注</th>
                 <th data-formatter="actionFormatter" data-events="actionEvents">操作</th>
             </tr>
         </thead>
@@ -109,7 +109,7 @@
                         <div class="control-group">
                             <label class="control-label">备注</label>
                             <div class="controls">
-                                <input type="text" maxlength="128" class="form-control" id="comments" name="comments" value="" oninput="onInput" placeholder="备注信息，必填, 最多500字符">
+                                <input type="text" maxlength="128" class="form-control" id="comment" name="comment" value="" oninput="onInput" placeholder="备注信息，必填, 最多500字符">
                                 <input type="hidden" id="interfaceID" name="interfaceID" value="" />
                             </div>
                         </div>
@@ -217,7 +217,7 @@
 
         $("#backend").val(row.Backend);
         $("#example").val(row.Example);
-        $("#comments").val(row.Comments);
+        $("#comment").val(row.Comment);
         $("#modal_title").html("修改参数信息");
         $("#variable_dialog").modal('show');
     }
@@ -308,7 +308,7 @@
             modifyID = 0;
             $("#name").val("");
             $("#path").val("");
-            $("#comments").val("");
+            $("#comment").val("");
         }
         $("#modal_title").html("增加项目");
         $("#variable_dialog").modal('show');
@@ -326,7 +326,7 @@
             showMessage("示例不能为空");
             return;
         }
-        if(checkEmpty($("#comments").val())) {
+        if(checkEmpty($("#comment").val())) {
             showMessage("备注不能为空");
             return;
         }

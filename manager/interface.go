@@ -201,7 +201,7 @@ func (i *interfaceAction) GET(w http.ResponseWriter, r *http.Request) {
 	if i.Search != "" {
 		stmt = stmt.Where("(interface.name like '%" + i.Search + "%'" +
 			" or interface.user like '%" + i.Search + "%'" +
-			" or interface.comments like '%" + i.Search + "%'" +
+			" or interface.comment like '%" + i.Search + "%'" +
 			" or interface.path like '%" + i.Search + "%'" +
 			" or interface.backend like '%" + i.Search + "%')")
 	}
@@ -304,15 +304,15 @@ func (i *interfaceAction) POST(w http.ResponseWriter, r *http.Request) {
 
 func (i *interfaceAction) PUT(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
-		ID       int64  `json:"id" valid:"Required"`
-		Name     string `json:"name"  valid:"Required"`
-		User     string `json:"user"`
-		Email    string `json:"email"`
-		Method   int    `json:"method"`
-		Path     string `json:"path"  valid:"AlphaNumeric"`
-		Backend  string `json:"backend"  valid:"Required"`
-		Comments string `json:"comments"  valid:"Required"`
-		Level    int    `json:"level"`
+		ID      int64  `json:"id" valid:"Required"`
+		Name    string `json:"name"  valid:"Required"`
+		User    string `json:"user"`
+		Email   string `json:"email"`
+		Method  int    `json:"method"`
+		Path    string `json:"path"  valid:"AlphaNumeric"`
+		Backend string `json:"backend"  valid:"Required"`
+		Comment string `json:"comment"  valid:"Required"`
+		Level   int    `json:"level"`
 	}{}
 
 	if err := util.DecodeRequestValue(r, &vars); err != nil {
@@ -321,7 +321,7 @@ func (i *interfaceAction) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := updateInterface(vars.ID, vars.Method, vars.Level, vars.Name, vars.Path, vars.Backend, vars.Comments, vars.User, vars.Email); err != nil {
+	if err := updateInterface(vars.ID, vars.Method, vars.Level, vars.Name, vars.Path, vars.Backend, vars.Comment, vars.User, vars.Email); err != nil {
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -365,6 +365,7 @@ func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 		Path      string
 		Method    int
 		Backend   string
+		Comment   string
 	}{}
 
 	if err := server.ParseJSONVars(r, &vars); err != nil {
@@ -380,6 +381,17 @@ func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer db.Close()
+
+	if vars.Email == "" {
+		var p meta.Project
+		if err = orm.NewStmt(db, "project").Where("id=%v", vars.ProjectID).Query(&p); err != nil {
+			log.Errorf("Query project:%v error:%v", vars.ProjectID, errors.ErrorStack(err))
+			response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
+			return
+		}
+		vars.User = p.User
+		vars.Email = p.Email
+	}
 
 	id, err := orm.NewStmt(db, "interface").Insert(&vars)
 	if err != nil {

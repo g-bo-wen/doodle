@@ -6,14 +6,14 @@ import (
 
 //Application 对应应用表.
 type Application struct {
-	ID       int64
-	Name     string
-	User     string
-	Email    string
-	Token    string
-	Comments string
-	Ctime    string
-	Mtime    string
+	ID      int64
+	Name    string
+	User    string
+	Email   string
+	Token   string
+	Comment string
+	Ctime   string
+	Mtime   string
 }
 
 //Relation 关联关系结构.
@@ -44,7 +44,7 @@ type Project struct {
 	Path       string `json:"path"  valid:"AlphaNumeric"`
 	Source     string `json:"source" `
 	Version    int    `json:"version" `
-	Comments   string `json:"comments" valid:"Required"`
+	Comment    string `json:"comment" valid:"Required"`
 	CTime      string `json:"ctime" db:"ctime" db_default:"now()"`
 	MTime      string `json:"mtime" db:"mtime" db_default:"now()"`
 }
@@ -57,26 +57,26 @@ type Variable struct {
 	IsNumber   bool `db:"is_number"`
 	IsRequired bool `db:"is_required"`
 	Example    string
-	Comments   string
+	Comment    string
 	Ctime      string
 	Mtime      string
 }
 
 // Interface 接口信息
 type Interface struct {
-	ID       int64
-	Name     string
-	User     string
-	Email    string
-	State    bool
-	Project  Project `db_table:"one"`
-	Path     string
-	Method   server.Method
-	Backend  string
-	Comments string
-	Level    int8
-	Ctime    string
-	Mtime    string
+	ID      int64
+	Name    string
+	User    string
+	Email   string
+	State   bool
+	Project Project `db_table:"one"`
+	Path    string
+	Method  server.Method
+	Backend string
+	Comment string
+	Level   int8
+	Ctime   string
+	Mtime   string
 }
 
 //TokenBody token结构.

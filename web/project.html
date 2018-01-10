@@ -26,7 +26,7 @@
                 <th data-field= 'email' data-sortable="true">邮箱</th>
                 <th data-field= 'path' data-sortable="true">路径</th>
                 <th data-field= 'version' data-sortable="true" data-formatter="versionFormatter">架构版本</th>
-                <th data-field= 'comments' data-sortable="true">备注</th>
+                <th data-field= 'comment' data-sortable="true">备注</th>
                 <th data-field= 'mtime' data-sortable="true">时间</th>
                 <th data-formatter="actionFormatter" data-events="actionEvents">操作</th>
             </tr>
@@ -101,7 +101,7 @@
                         <div class="form-group">
                             <label class="col-sm-2 control-label">备注</label>
                             <div class="col-sm-10">
-                                <input type="text" maxlength="500" class="form-control" id="comments" name="comments" oninput="onInput()" value="" placeholder="备注信息，必填, 最多500字符">
+                                <input type="text" maxlength="500" class="form-control" id="comment" name="comment" oninput="onInput()" value="" placeholder="备注信息，必填, 最多500字符">
                             </div>
                         </div>
                     </form>
@@ -178,7 +178,7 @@
             $(".modal #email").attr("readonly", "readonly");
         }
 
-        $(".modal #comments").val(row.comments);
+        $(".modal #comment").val(row.comment);
         $("#modal_title").html("修改项目信息");
         $("#project_dialog").modal('show');
     }
@@ -233,7 +233,7 @@
             modifyProjectID = 0;
             $("#name").val("");
             $("#path").val("");
-            $("#comments").val("");
+            $("#comment").val("");
         }
         $(".modal #user").val(account.fullname);
         $(".modal #email").val(account.email);
@@ -267,7 +267,7 @@
             return;
         }
 
-        if(checkEmpty($("#comments").val())) {
+        if(checkEmpty($("#comment").val())) {
             showMessage("备注不能为空");
             return;
         }
@@ -292,7 +292,7 @@
                     $('#data_table').bootstrapTable('refreshOptions',{pageNumber: 1,offset:0});
                     $("#name").val("");
                     $("#path").val("");
-                    $("#comments").val("");
+                    $("#comment").val("");
                 }
                 else {
                     showMessage("<h3>失败:"+data.Message+"</h3>");

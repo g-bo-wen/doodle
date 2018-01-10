@@ -41,11 +41,11 @@ func (ri *roleInfo) GET(w http.ResponseWriter, r *http.Request) {
 }
 
 type role struct {
-	RoleID   int64  `json:"role_id"`
-	Name     string `json:"name"`
-	User     string `json:"user"`
-	Email    string `json:"email"`
-	Comments string `json:"comments"`
+	RoleID  int64  `json:"role_id"`
+	Name    string `json:"name"`
+	User    string `json:"user"`
+	Email   string `json:"email"`
+	Comment string `json:"comment"`
 }
 
 func (r *role) GET(w http.ResponseWriter, req *http.Request) {
@@ -102,7 +102,7 @@ func (r *role) POST(w http.ResponseWriter, req *http.Request) {
 		r.Email = u.Email
 	}
 
-	id, err := rbacClient.PostRole(r.Name, r.Comments, r.User, r.Email)
+	id, err := rbacClient.PostRole(r.Name, r.Comment, r.User, r.Email)
 	if err != nil {
 		log.Errorf("RoleAdd error, vars:%v, err:%v", r, err)
 		response(w, Response{Status: 500, Message: err.Error()})
@@ -133,7 +133,7 @@ func (r *role) PUT(w http.ResponseWriter, req *http.Request) {
 		r.Email = u.Email
 	}
 
-	if err := rbacClient.PutRole(r.RoleID, r.Name, r.Comments); err != nil {
+	if err := rbacClient.PutRole(r.RoleID, r.Name, r.Comment); err != nil {
 		log.Errorf("RoleUpdate error, vars:%v, err:%v", r, err)
 		response(w, Response{Status: 500, Message: err.Error()})
 		return
@@ -198,8 +198,8 @@ func (ru *roleUser) GET(w http.ResponseWriter, r *http.Request) {
 	switch ru.Sort {
 	case "RoleName":
 		ru.Sort = "role.name"
-	case "RoleComments":
-		ru.Sort = "role.comments"
+	case "RoleComment":
+		ru.Sort = "role.comment"
 	case "Mtime":
 		ru.Sort = "role_user.mtime"
 	}
@@ -244,8 +244,8 @@ func (ur *userRole) GET(w http.ResponseWriter, r *http.Request) {
 	switch ur.Sort {
 	case "RoleName":
 		ur.Sort = "role.name"
-	case "RoleComments":
-		ur.Sort = "role.comments"
+	case "RoleComment":
+		ur.Sort = "role.comment"
 	case "Mtime":
 		ur.Sort = "role_user.mtime"
 	}

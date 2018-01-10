@@ -133,12 +133,19 @@ func (v *variable) DELETE(w http.ResponseWriter, r *http.Request) {
 		ID int64 `json:"id"`
 	}{}
 
-	if err := util.DecodeRequestValue(r, &vars); err != nil {
+	_, err := session.User(r)
+	if err != nil {
+		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
+		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		return
+	}
+
+	if err = util.DecodeRequestValue(r, &vars); err != nil {
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if err := del("variable", vars.ID); err != nil {
+	if err = del("variable", vars.ID); err != nil {
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -155,7 +162,7 @@ func (v *variable) POST(w http.ResponseWriter, r *http.Request) {
 		IsNumber    int    `db:"is_number" json:"is_number"`
 		IsRequired  int    `db:"is_required" json:"is_required"`
 		Example     string `json:"example"  valid:"Required"`
-		Comments    string `json:"comments"  valid:"Required"`
+		Comment     string `json:"comment"  valid:"Required"`
 		CTime       string `db_default:"now()"`
 		Mtime       string `db_default:"now()"`
 	}{}
@@ -184,7 +191,7 @@ func (v *variable) PUT(w http.ResponseWriter, r *http.Request) {
 		IsNumber   int    `json:"is_number"`
 		IsRequired int    `json:"is_required"`
 		Example    string `json:"example"  valid:"Required"`
-		Comments   string `json:"comments"  valid:"Required"`
+		Comment    string `json:"comment"  valid:"Required"`
 	}{}
 
 	if err := util.DecodeRequestValue(r, &vars); err != nil {
@@ -193,7 +200,7 @@ func (v *variable) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := updateVariable(vars.ID, vars.Postion, vars.Name, vars.IsNumber, vars.IsRequired, vars.Example, vars.Comments); err != nil {
+	if err := updateVariable(vars.ID, vars.Postion, vars.Name, vars.IsNumber, vars.IsRequired, vars.Example, vars.Comment); err != nil {
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}

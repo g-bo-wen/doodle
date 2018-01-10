@@ -36,7 +36,7 @@
                 <th data-field='User' data-sortable="true">负责人</th>
                 <th data-field='Path' data-sortable="true" data-formatter="frontFormatter" >前端地址</th>
                 <th data-field='Backend' data-sortable="true">后端地址</th>
-                <th data-field='Comments'>备注</th>
+                <th data-field='Comment'>备注</th>
                 <th data-field='Ctime' data-visible="false">创建时间</th>
                 <th data-formatter="actionFormatter" data-events="actionEvents">操作</th>
             </tr>
@@ -95,7 +95,7 @@
                         <div class="control-group">
                             <label class="control-label">备注</label>
                             <div class="controls">
-                                <input type="text" maxlength="500" class="form-control" id="comments" name="comments" oninput="onInput" value="" placeholder="备注信息，必填, 最多500字符">
+                                <input type="text" maxlength="500" class="form-control" id="comment" name="comment" oninput="onInput" value="" placeholder="备注信息，必填, 最多500字符">
                                 <input type="hidden" id="pid" name="pid" value="" />
                             </div>
                         </div>
@@ -234,7 +234,7 @@
         }
 
         $("#backend").val(row.Backend);
-        $("#comments").val(row.Comments);
+        $("#comment").val(row.Comment);
         $("#modal_title").html("修改接口基本信息");
         $("#interface_dialog").modal('show');
     }
@@ -298,7 +298,7 @@
             $("#name").val("");
             $("#path").val("");
             $("#backend").val("");
-            $("#comments").val("");
+            $("#comment").val("");
         }
 
         $(".modal #user").val(account.fullname);
@@ -340,7 +340,7 @@
             return;
         }
 
-        if(checkEmpty($("#comments").val())) {
+        if(checkEmpty($("#comment").val())) {
             showMessage("备注不能为空");
             return;
         }
@@ -367,7 +367,7 @@
                     $("#name").val("");
                     $("#path").val("");
                     $("#backend").val("");
-                    $("#comments").val("");
+                    $("#comment").val("");
                 }
                 else {
                     showMessage("<h3>"+data.Message+"</h3>");

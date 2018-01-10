@@ -133,14 +133,14 @@
                     }
                     switch (item.Postion) {
                         case 0:
-                        $("#varUrl").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comments+'</td></tr>');
+                        $("#varUrl").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
                         break;
                         case 1:
-                        $("#varHeader").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comments+'</td></tr>');
+                        $("#varHeader").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
                         break;
                         case 2:
                         case 3:
-                        $("#varBody").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comments+'</td></tr>');
+                        $("#varBody").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
                         break;
                     }
                 });  
@@ -190,9 +190,9 @@
 
 
         $("#projectName").html(project.name);
-        $("#projectInfo").html(project.comments);
+        $("#projectInfo").html(project.comment);
         $("#interfaceName").html(iface.Name);
-        $("#interfaceInfo").html(iface.Comments);
+        $("#interfaceInfo").html(iface.Comment);
         $("#level").html(getLevelName(iface.Level));
         $("#method").html(getMethodName(iface.Method));
         $("#auth").html(iface.User+'&nbsp;&nbsp;<div class="glyphicon glyphicon-envelope">'+iface.Email+'</div>');
