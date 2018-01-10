@@ -61,6 +61,11 @@ func newTask(projectID int64) (*task, error) {
 	if err = orm.NewStmt(db, "project").Where("project.id=%v", projectID).Query(&p); err != nil {
 		return nil, errors.Trace(err)
 	}
+
+	if err = orm.NewStmt(db, "node").Where("cluster_id=%d", p.Cluster.ID).Query(&p.Cluster.Node); err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	log.Debugf("project:%#v", p)
 
 	path := fmt.Sprintf("%s/%v", config.Distributor.Server.BuildPath, time.Now().UnixNano())
