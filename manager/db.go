@@ -175,14 +175,14 @@ func updateInterface(id int64, method, level int, name, path, backend, comment, 
 	return errors.Trace(err)
 }
 
-func updateVariable(id int64, postion int, name string, isNumber, isRequired int, example, comment string) error {
-	sql := "update variable set postion=?, name =?, is_number=?, is_required=?, example=?, comment=?, mtime=now() where id=?"
+func updateVariable(id int64, postion int, name, Type string, required int, example, comment string) error {
+	sql := "update variable set postion=?, name =?, type=?, required=?, example=?, comment=?, mtime=now() where id=?"
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return errors.Trace(err)
 	}
 	defer db.Close()
-	_, err = db.Exec(sql, postion, name, isNumber, isRequired, example, comment, id)
+	_, err = db.Exec(sql, postion, name, Type, required, example, comment, id)
 	return errors.Trace(err)
 }
 

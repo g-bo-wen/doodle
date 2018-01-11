@@ -159,8 +159,8 @@ func (v *variable) POST(w http.ResponseWriter, r *http.Request) {
 		InterfaceID int64  `db:"interface_id" json:"interfaceID" valid:"Required"`
 		Postion     int    `json:"postion"`
 		Name        string `json:"name"  valid:"Required"`
-		IsNumber    int    `db:"is_number" json:"is_number"`
-		IsRequired  int    `db:"is_required" json:"is_required"`
+		Type        string `json:"type"  valid:"Required"`
+		Required    int    `db:"required" json:"required"`
 		Example     string `json:"example"  valid:"Required"`
 		Comment     string `json:"comment"  valid:"Required"`
 		CTime       string `db_default:"now()"`
@@ -185,13 +185,13 @@ func (v *variable) POST(w http.ResponseWriter, r *http.Request) {
 
 func (v *variable) PUT(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
-		ID         int64  `json:"id" valid:"Required"`
-		Postion    int    `json:"postion"`
-		Name       string `json:"name"  valid:"Required"`
-		IsNumber   int    `json:"is_number"`
-		IsRequired int    `json:"is_required"`
-		Example    string `json:"example"  valid:"Required"`
-		Comment    string `json:"comment"  valid:"Required"`
+		ID       int64  `json:"id" valid:"Required"`
+		Postion  int    `json:"postion"`
+		Name     string `json:"name"  valid:"Required"`
+		Type     string `json:"type"  valid:"Required"`
+		Required int    `json:"required"`
+		Example  string `json:"example"  valid:"Required"`
+		Comment  string `json:"comment"  valid:"Required"`
 	}{}
 
 	if err := util.DecodeRequestValue(r, &vars); err != nil {
@@ -200,7 +200,7 @@ func (v *variable) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := updateVariable(vars.ID, vars.Postion, vars.Name, vars.IsNumber, vars.IsRequired, vars.Example, vars.Comment); err != nil {
+	if err := updateVariable(vars.ID, vars.Postion, vars.Name, vars.Type, vars.Required, vars.Example, vars.Comment); err != nil {
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}

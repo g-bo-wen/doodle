@@ -77,7 +77,7 @@ func (dc *dbCache) conectDB() error {
 		return errors.Trace(err)
 	}
 
-	if dc.selVar, err = dc.dbc.Prepare("select postion, name, is_number, is_required from variable where interface_id = ?"); err != nil {
+	if dc.selVar, err = dc.dbc.Prepare("select postion, name, type, required from variable where interface_id = ?"); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -261,7 +261,7 @@ func (dc *dbCache) getVariable(id int64) ([]*meta.Variable, error) {
 
 	for rows.Next() {
 		var v meta.Variable
-		if err = rows.Scan(&v.Postion, &v.Name, &v.IsNumber, &v.IsRequired); err != nil {
+		if err = rows.Scan(&v.Postion, &v.Name, &v.Type, &v.Required); err != nil {
 			return nil, errors.Trace(err)
 		}
 		vs = append(vs, &v)

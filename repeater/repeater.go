@@ -33,11 +33,11 @@ func (r *repeater) delValue(req *http.Request, v *meta.Variable) {
 }
 
 func (r *repeater) validateValue(v *meta.Variable, val string) (bool, error) {
-	if !v.IsRequired && val == "" {
+	if !v.Required && val == "" {
 		return true, nil
 	}
 
-	if v.IsNumber {
+	if v.Type == "int" {
 		_, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			log.Infof("val:%s, ParseInt error:%s, in %s", val, err.Error(), v.Postion)
