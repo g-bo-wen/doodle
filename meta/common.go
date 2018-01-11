@@ -51,15 +51,15 @@ type Project struct {
 
 //Variable 接口参数
 type Variable struct {
-	ID         int64
-	Postion    server.VariablePostion
-	Name       string
-	IsNumber   bool `db:"is_number"`
-	IsRequired bool `db:"is_required"`
-	Example    string
-	Comment    string
-	Ctime      string
-	Mtime      string
+	ID       int64
+	Postion  server.VariablePostion
+	Name     string
+	Type     string
+	Required bool
+	Example  string
+	Comment  string
+	Ctime    string
+	Mtime    string
 }
 
 // Interface 接口信息

@@ -72,6 +72,36 @@
                 </tbody>
             </table>
 
+            <table class="table table-hover table-bordered bs-callout bs-callout-warning" style="word-break:break-all; word-wrap:break-all;">
+                <caption><h4>(请求体)JSON</h4></caption>
+                <thead>
+                    <tr>
+                        <th class="col-md-2">字段</th>
+                        <th class="col-md-2">类型</th>
+                        <th class="col-md-2">约束</th>
+                        <th class="col-md-2">示例</th>
+                        <th class="col-md-2">说明</th>
+                    </tr>
+                </thead>
+                <tbody  id="varRequestJSON">
+                </tbody>
+            </table>
+
+            <table class="table table-hover table-bordered bs-callout bs-callout-warning" style="word-break:break-all; word-wrap:break-all;">
+                <caption><h4>返回值(JSON)</h4></caption>
+                <thead>
+                    <tr>
+                        <th class="col-md-2">字段</th>
+                        <th class="col-md-2">类型</th>
+                        <th class="col-md-2">约束</th>
+                        <th class="col-md-2">示例</th>
+                        <th class="col-md-2">说明</th>
+                    </tr>
+                </thead>
+                <tbody  id="varResponseJSON">
+                </tbody>
+            </table>
+
             <h4>联系人</h4>
             <p class="text-danger" id="auth"></p>
 
@@ -128,19 +158,25 @@
                 vars = data.rows;
                 $.each(data.rows, function (i, item) {
                     cls = ""
-                    if (item.IsRequired == true) {
+                    if (item.Required == true) {
                         cls=' class="danger"';
                     }
                     switch (item.Postion) {
                         case 0:
-                        $("#varUrl").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
+                        $("#varUrl").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+item.Type+'</td><td>'+getIsRequiredName(item.Required)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
                         break;
                         case 1:
-                        $("#varHeader").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
+                        $("#varHeader").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+item.Type+'</td><td>'+getIsRequiredName(item.Required)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
                         break;
                         case 2:
                         case 3:
-                        $("#varBody").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+getIsNumberName(item.IsNumber)+'</td><td>'+getIsRequiredName(item.IsRequired)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
+                        $("#varBody").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+item.Type+'</td><td>'+getIsRequiredName(item.Required)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
+                        break;
+                        case 4:
+                        $("#varRequestJSON").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+item.Type+'</td><td>'+getIsRequiredName(item.Required)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
+                        break;
+                        case 14:
+                        $("#varResponseJSON").append('<tr'+cls+'><td>'+item.Name+'</td><td>'+item.Type+'</td><td>'+getIsRequiredName(item.Required)+'</td><td>'+item.Example+'</td><td>'+item.Comment+'</td></tr>');
                         break;
                     }
                 });  

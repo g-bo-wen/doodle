@@ -32,8 +32,8 @@
             <tr>
                 <th data-field='Name' data-sortable="true" >参数名</th>
                 <th data-field='Postion' data-sortable="true">参数位置</th>
-                <th data-field='IsNumber' data-sortable="true">类型</th>
-                <th data-field='IsRequired' data-sortable="true">必填</th>
+                <th data-field='Type' data-sortable="true">类型</th>
+                <th data-field='Required' data-sortable="true">必填</th>
                 <th data-field='Example' data-sortable="true">示例</th>
                 <th data-field='Comment' data-sortable="true">备注</th>
                 <th data-formatter="actionFormatter" data-events="actionEvents">操作</th>
@@ -84,20 +84,22 @@
                                 <label class="radio-inline"> <input type="radio" name="postion" id="postion0" value="0" checked="checked" >URL</label>
                                 <label class="radio-inline"> <input type="radio" name="postion" id="postion1" value="1">Header</label>
                                 <label class="radio-inline"> <input type="radio" name="postion" id="postion2" value="3">Body</label>
+                                <label class="radio-inline"> <input type="radio" name="postion" id="postion4" value="4">Request JSON</label>
+                                <label class="radio-inline"> <input type="radio" name="postion" id="postion14" value="14">Response JSON</label>
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label">必填字段</label>
                             <div class="controls">
-                                <label class="radio-inline"> <input type="radio" name="is_required" id="isrequired0" value="0" checked="checked">可选</label>
-                                <label class="radio-inline"> <input type="radio" name="is_required" id="isrequired1" value="1">必填</label>
+                                <label class="radio-inline"> <input type="radio" name="required" id="required0" value="0" checked="checked">可选</label>
+                                <label class="radio-inline"> <input type="radio" name="required" id="required1" value="1">必填</label>
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label">类型</label>
                             <div class="controls">
-                                <label class="radio-inline"> <input type="radio" name="is_number" id="isnumber0" value="0" checked="checked">string</label>
-                                <label class="radio-inline"> <input type="radio" name="is_number" id="isnumber1" value="1">int</label>
+                                <label class="radio-inline"> <input type="radio" name="type" id="radio_type_string" value="string" checked="checked">string</label>
+                                <label class="radio-inline"> <input type="radio" name="type" id="radio_type_int+" value="int">int</label>
                             </div>
                         </div>
                         <div class="control-group">
@@ -189,6 +191,7 @@
         modifyID = row.ID;
         $("#name").val(row.Name);
         $("#path").val(row.Path);
+
         switch(row.Postion) {
             case "URL":
             $("#postion0").attr('checked',true);
@@ -199,21 +202,22 @@
             case "Body":
             $("#postion2").attr('checked',true);
             break;
-        }
-        switch(row.IsRequired) {
-            case "选填":
-            $("#isrequired0").attr('checked',true);
+            case "Request JSON":
+            $("#postion4").attr('checked',true);
             break;
-            default:
-            $("#isrequired1").attr('checked',true);
-        }
-        switch(row.IsNumber) {
-            case "string":
-            $("#isnumber0").attr('checked',true);
+            case "Response JSON":
+            $("#postion14").attr('checked',true);
             break;
-            default:
-            $("#isnumber1").attr('checked',true);
         }
+
+        if (row.Required == "选填") {
+            $("#required0").attr('checked',true);
+        }
+        else {
+            $("#required1").attr('checked',true);
+        }
+
+        $("#radio_type_"+row.type).attr('checked',true);
 
         $("#backend").val(row.Backend);
         $("#example").val(row.Example);
@@ -240,7 +244,7 @@
             success: function(data,status) { 
                 $.each(data.rows, function (i, item) {  
                     $("#test_form").append('<div class="control-group"><label class="control-label"><h4>'+item.Name+'<small>('+getPostionName(item.Postion)+')</small>'+'</h4></label>'+
-                        '<div class="controls"><input type="text" class="form-control" name="'+item.Name+'" value="" placeholder="'+getIsRequiredName(item.IsRequired) + ' '+ getIsNumberName(item.IsNumber)+'" > </div> </div>');
+                        '<div class="controls"><input type="text" class="form-control" name="'+item.Name+'" value="" placeholder="'+getIsRequiredName(item.Required) + ' '+ item.type +'" > </div> </div>');
                 });  
                 $("#test_dialog").modal('show');
             },
@@ -372,14 +376,6 @@
     function queryParams(params) {
         params.projectID = projectID;
         params.interfaceID = interfaceID;
-        switch (params.sort) {
-            case "IsRequired":
-            params.sort = "is_required"
-            break;
-            case "IsNumber":
-            params.sort = "is_number"
-            break;
-        }
         return params; 
     }
 
@@ -395,18 +391,22 @@
             case 3:
             row.Postion = "Body";
             break;
+
+            case 4:
+            row.Postion = "Request JSON";
+            break;
+
+            case 14:
+            row.Postion = "Response JSON";
+            break;
+
+            break;
         }
 
-        if (row.IsNumber == true) {
-            row.IsNumber = "int";
+        if (row.Required == true) {
+            row.Required = "必填";
             }else {
-            row.IsNumber = "string";
-        }
-
-        if (row.IsRequired == true) {
-            row.IsRequired = "必填";
-            }else {
-            row.IsRequired = "选填";
+            row.Required = "选填";
         }
 
         return {};

@@ -2,6 +2,7 @@ package manager
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -17,6 +18,7 @@ import (
 	"github.com/zssky/log"
 
 	"github.com/dearcode/doodle/meta"
+	"github.com/dearcode/doodle/meta/document"
 	"github.com/dearcode/doodle/util"
 )
 
@@ -58,7 +60,7 @@ func (i *interfaceRun) PUT(w http.ResponseWriter, r *http.Request) {
 
 	for _, v := range vs {
 		val := r.FormValue(v.Name)
-		if val == "" && v.IsRequired {
+		if val == "" && v.Required {
 			fmt.Fprintf(w, "字段:"+v.Name+"不能为空")
 			return
 		}
@@ -356,6 +358,55 @@ func (id *interfaceDeploy) PUT(w http.ResponseWriter, r *http.Request) {
 type interfaceRegister struct {
 }
 
+type jsonVariable struct {
+	InterfaceID int64
+	Postion     int
+	Name        string
+	Type        string
+	Required    bool
+	Example     string
+	Comment     string
+}
+
+func (ir *interfaceRegister) addVariable(level int, suffix string, db *sql.DB, interfaceID int64, postion int, fields map[string]document.Field) error {
+	vars := jsonVariable{
+		InterfaceID: interfaceID,
+		Postion:     postion,
+	}
+
+	for _, v := range fields {
+		vars.Name = strings.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;", level) + v.Name
+
+		if suffix != "" {
+			vars.Name += "&nbsp;&nbsp;&nbsp;&nbsp;<mark>" + suffix + "</mark>"
+		}
+		vars.Comment = v.Comment
+		vars.Type = v.Type
+		vars.Required = v.Required
+
+		id, err := orm.NewStmt(db, "variable").Insert(&vars)
+		if err != nil {
+			log.Errorf("insert variable:%+v, err:%v", vars, errors.ErrorStack(err))
+			return errors.Trace(err)
+		}
+
+		log.Debugf("new variable:%+v id:%v", vars, id)
+
+		if v.Child != nil {
+			if err = ir.addVariable(level+1, vars.Type, db, interfaceID, postion, v.Child); err != nil {
+				return errors.Trace(err)
+			}
+		}
+	}
+
+	return nil
+}
+
+const (
+	postionRequestJSON  = 4
+	postionResponseJSON = 14
+)
+
 func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
 		ProjectID int64
@@ -366,6 +417,7 @@ func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 		Method    int
 		Backend   string
 		Comment   string
+		Attr      document.Method `db_default:"auto"`
 	}{}
 
 	if err := server.ParseJSONVars(r, &vars); err != nil {
@@ -396,6 +448,18 @@ func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 	id, err := orm.NewStmt(db, "interface").Insert(&vars)
 	if err != nil {
 		log.Errorf("insert interface:%+v, error:%v", vars, err)
+		server.SendResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err = ir.addVariable(0, "", db, id, postionRequestJSON, vars.Attr.Request); err != nil {
+		log.Errorf("add request variable:%+v, error:%v", vars.Attr.Request, err)
+		server.SendResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err = ir.addVariable(0, "", db, id, postionResponseJSON, vars.Attr.Response); err != nil {
+		log.Errorf("add response variable:%+v, error:%v", vars.Attr.Response, err)
 		server.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}

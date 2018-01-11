@@ -14,6 +14,7 @@ import (
 
 	"github.com/dearcode/doodle/distributor/config"
 	"github.com/dearcode/doodle/meta"
+	"github.com/dearcode/doodle/meta/document"
 	"github.com/dearcode/doodle/util"
 	"github.com/dearcode/doodle/util/etcd"
 )
@@ -91,7 +92,7 @@ func (w *watcher) load() error {
 type managerClient struct {
 }
 
-func (mc *managerClient) interfaceRegister(projectID int64, name, method, path, backend, comment string) error {
+func (mc *managerClient) interfaceRegister(projectID int64, name, method, path, backend string, m document.Method) error {
 	url := fmt.Sprintf("%sinterface/register/", config.Distributor.Manager.URL)
 	req := struct {
 		Name      string
@@ -100,13 +101,15 @@ func (mc *managerClient) interfaceRegister(projectID int64, name, method, path, 
 		Method    server.Method
 		Backend   string
 		Comment   string
+		Attr      document.Method
 	}{
 		Name:      name,
 		ProjectID: projectID,
 		Path:      path,
 		Backend:   backend,
 		Method:    server.NewMethod(method),
-		Comment:   comment,
+		Comment:   m.Comment,
+		Attr:      m,
 	}
 
 	resp := struct {
@@ -132,24 +135,6 @@ const (
 	httpConnectTimeout = 60
 )
 
-type docField struct {
-	Name     string
-	Type     string
-	Required bool
-	Comment  string
-}
-
-type docMethod struct {
-	Comment  string
-	Request  map[string]docField
-	Response map[string]docField
-}
-
-type docObject struct {
-	URL     string
-	Methods map[string]docMethod
-}
-
 func (w *watcher) parseDocument(backend string, app meta.MicroAPP) error {
 	url := fmt.Sprintf("http://%s:%d/document/", app.Host, app.Port)
 	buf, err := client.New(httpConnectTimeout).Get(url, nil, nil)
@@ -157,7 +142,7 @@ func (w *watcher) parseDocument(backend string, app meta.MicroAPP) error {
 		return errors.Trace(err)
 	}
 
-	var doc map[string]docObject
+	var doc map[string]document.Module
 	log.Debugf("source:%s", buf)
 
 	if err = json.Unmarshal(buf, &doc); err != nil {
@@ -176,7 +161,7 @@ func (w *watcher) parseDocument(backend string, app meta.MicroAPP) error {
 	mc := managerClient{}
 	for ok, ov := range doc {
 		for mk, mv := range ov.Methods {
-			mc.interfaceRegister(projectID, ok+"_"+mk, mk, ov.URL, backend, mv.Comment)
+			mc.interfaceRegister(projectID, ok+"_"+mk, mk, ov.URL, backend, mv)
 		}
 	}
 
