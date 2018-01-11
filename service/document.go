@@ -221,21 +221,6 @@ func (d *document) add(name, url string, rm reflect.Method) {
 	m.merge(m.Response)
 }
 
-//methods 返回所有对外接口.
-func (d *document) methods() []string {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
-	var ms []string
-
-	for _, md := range d.Modules {
-		ms = append(ms, md.URL)
-	}
-
-	//	log.Debugf("methods:%#v", ms)
-	return ms
-}
-
 func (m *method) parse(arg reflect.Type, fm map[string]*field) {
 	if arg.Kind() == reflect.Ptr {
 		arg = arg.Elem()

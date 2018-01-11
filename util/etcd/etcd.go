@@ -154,7 +154,9 @@ func (e *Client) Keepalive(key, val string) (clientv3.Lease, error) {
 	log.Debugf("pr:%v", pr)
 
 	ctx, cancel = context.WithCancel(context.Background())
-	if _, err = lessor.KeepAlive(ctx, clientv3.LeaseID(lr.ID)); err != nil {
+	_, err = lessor.KeepAlive(ctx, clientv3.LeaseID(lr.ID))
+	cancel()
+	if err != nil {
 		lessor.Close()
 		return nil, errors.Trace(err)
 	}

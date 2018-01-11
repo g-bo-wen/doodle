@@ -96,7 +96,7 @@ func Request(method, url string, headers map[string]string, body io.Reader) ([]b
 func AesEncrypt(encodeStr []byte, key []byte) (string, error) {
 	encodeBytes := encodeStr
 	block, err := aes.NewCipher(key)
-	if err != err {
+	if err != nil {
 		return "", err
 	}
 	blockSize := block.BlockSize()

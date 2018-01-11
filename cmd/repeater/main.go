@@ -42,7 +42,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	if err = repeater.ServerInit(); err != nil {
+	if err = repeater.Init(); err != nil {
 		panic(err.Error())
 	}
 
@@ -54,12 +54,17 @@ func main() {
 		}
 	}()
 
-	shutdown := make(chan os.Signal)
+	log.Infof("listen addr:%v", ln.Addr().String())
+
+	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGUSR1)
 
 	s := <-shutdown
 	log.Warningf("recv signal %v, close.", s)
+
 	as.Shutdown(context.Background())
+	repeater.Stop()
+
 	time.Sleep(time.Duration(config.Repeater.Cache.Timeout) * time.Second)
 	log.Warningf("server exit")
 }

@@ -17,17 +17,23 @@ source := $(shell ls -ld */|awk '$$NF !~ /bin\/|logs\/|config\/|_vendor\/|vendor
 golint:
 	go get github.com/golang/lint/golint
 
+megacheck:
+	go get honnef.co/go/tools/cmd/megacheck
+
 init:
 	if [ -d _vendor ]; then mv _vendor vendor; fi
 
 deinit:
 	if [ -d vendor ]; then mv vendor _vendor; fi
 
-lint: golint
+lint: golint megacheck
 	for path in $(source); do golint "$$path..."; done;
 	for path in $(source); do gofmt -s -l -w $$path;  done;
 	go tool vet $(files) 2>&1
 	go tool vet --shadow $(files) 2>&1
+	megacheck ./...
+
+
 
 clean:
 	@rm -rf bin

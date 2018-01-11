@@ -46,7 +46,7 @@ func main() {
 
 	log.Infof("listener %s", ln.Addr())
 
-	shutdown := make(chan os.Signal)
+	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGUSR1)
 
 	s := <-shutdown

@@ -8,13 +8,6 @@ import (
 	"github.com/zssky/log"
 )
 
-type deployLogs struct {
-	ID         int64
-	DeployID   int64
-	INFO       string
-	CreateTime string `db_default:"auto"`
-}
-
 type distributorLogs struct {
 	ID            int64
 	DistributorID int64
@@ -56,8 +49,6 @@ func (d *distributor) POST(w http.ResponseWriter, r *http.Request) {
 	server.SendResponseData(w, t.d.ID)
 
 	go d.run(t)
-
-	return
 }
 
 func (d *distributor) run(t *task) {

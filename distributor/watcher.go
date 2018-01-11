@@ -181,7 +181,6 @@ func (w *watcher) register(backend string, app meta.MicroAPP) {
 	w.apps[backend] = app
 	w.parseDocument(backend, app)
 	log.Debugf("new backend:%s, app:%+v", backend, app)
-	return
 }
 
 func (w *watcher) stop() {

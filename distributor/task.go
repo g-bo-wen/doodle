@@ -22,17 +22,15 @@ import (
 )
 
 const (
-	stateInit = iota
-	stateCompileBegin
+	stateCompileBegin = iota + 1
 	stateComplieSuccess
 	stateComplieFailed
 	stateInstallBegin
 	stateInstallSuccess
 	stateInstallFailed
 
-	sqlWriteLogs       = "update distributor_logs set info = concat(info, ?) , state = ? where id=?"
-	sqlWriteServerInfo = "update distributor set server = ?, pid = ? where id=?"
-	sqlUpdateState     = "update distributor set state = ? where id=?"
+	sqlWriteLogs   = "update distributor_logs set info = concat(info, ?) , state = ? where id=?"
+	sqlUpdateState = "update distributor set state = ? where id=?"
 )
 
 var (

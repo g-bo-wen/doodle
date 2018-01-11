@@ -10,11 +10,14 @@ import (
 
 var (
 	mdb *orm.DB
+	w   *watcher
 )
 
-// ServerInit 初始化HTTP接口.
-func ServerInit(confPath string) error {
-	if err := config.Load(confPath); err != nil {
+// Init 初始化HTTP接口.
+func Init(confPath string) error {
+	var err error
+
+	if err = config.Load(confPath); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -22,8 +25,7 @@ func ServerInit(confPath string) error {
 
 	server.RegisterPath(&distributor{}, "/distributor/")
 
-	w, err := newWatcher()
-	if err != nil {
+	if w, err = newWatcher(); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -34,4 +36,9 @@ func ServerInit(confPath string) error {
 	}
 
 	return nil
+}
+
+//Stop 关闭watcher.
+func Stop() {
+	w.stop()
 }

@@ -238,7 +238,7 @@ func (r *repeater) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	b := time.Now()
 	rb, code, err := util.DoRequest(req)
-	cost := time.Now().Sub(b) / time.Millisecond
+	cost := time.Since(b) / time.Millisecond
 
 	if err != nil {
 		log.Errorf("%s app email:%v,iface email:%v millisecond:%d end error:%s", id, app.Email, iface.Email, cost, err.Error())

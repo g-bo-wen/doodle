@@ -128,7 +128,7 @@ func (s *Service) Start() {
 		panic(err)
 	}
 
-	shutdown := make(chan os.Signal)
+	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGUSR1)
 
 	sig := <-shutdown

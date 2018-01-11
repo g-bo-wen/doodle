@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/coreos/etcd/clientv3"
 )
 
 var (
@@ -43,10 +45,11 @@ func TestWatchKey(t *testing.T) {
 
 	}()
 
-	es := c.WatchPrefix(testKeyPrefix)
-	for _, e := range es {
-		t.Logf("event:%v, key:%s", e.Type, e.Kv.Key)
-	}
+	ec := make(chan clientv3.Event)
+
+	c.WatchPrefix(testKeyPrefix, ec)
+	e := <-ec
+	t.Logf("event:%v, key:%s", e.Type, e.Kv.Key)
 
 }
 

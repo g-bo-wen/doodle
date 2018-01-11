@@ -8,10 +8,6 @@ import (
 	"github.com/zssky/log"
 )
 
-const (
-	projectPath = "github.com/dearcode"
-)
-
 //proxy 转http请求为函数调用.
 func proxy(w http.ResponseWriter, r *http.Request, m reflect.Method) {
 	reqType := m.Type.In(1)
@@ -20,7 +16,7 @@ func proxy(w http.ResponseWriter, r *http.Request, m reflect.Method) {
 	reqVal := reflect.New(reqType)
 	respVal := reflect.New(respType)
 
-	header := reqVal.Elem().FieldByName("APIHeader")
+	header := reqVal.Elem().FieldByName("RequestHeader")
 	if header.IsValid() {
 		header.FieldByName("Session").SetString(r.Header.Get("Session"))
 		header.FieldByName("Request").Set(reflect.ValueOf(*r))

@@ -37,7 +37,7 @@ func main() {
 		log.SetRotateByDay()
 	}
 
-	if err := distributor.ServerInit(*configPath); err != nil {
+	if err := distributor.Init(*configPath); err != nil {
 		panic(err)
 	}
 
@@ -48,11 +48,14 @@ func main() {
 
 	log.Infof("listener %s", ln.Addr())
 
-	shutdown := make(chan os.Signal)
+	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGUSR1)
 
 	s := <-shutdown
 	log.Warningf("recv signal %v, close.", s)
+
+	distributor.Stop()
+
 	ln.Close()
 	time.Sleep(maxWaitTime)
 	log.Warningf("server exit")

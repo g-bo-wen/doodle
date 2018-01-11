@@ -13,11 +13,9 @@ import (
 
 	"github.com/dearcode/doodle/meta"
 	"github.com/dearcode/doodle/util"
-	"github.com/dearcode/doodle/util/etcd"
 )
 
 type dbCache struct {
-	etcd        *etcd.Client
 	cache       *cache.Cache
 	selProject  *sql.Stmt
 	selIface    *sql.Stmt

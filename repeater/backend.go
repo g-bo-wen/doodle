@@ -137,7 +137,6 @@ func (bs *backendService) register(name string, app meta.MicroAPP) {
 	bs.apps[name] = append(apps, app)
 
 	log.Debugf("new name:%s, add app:%+v", name, app)
-	return
 }
 
 //getMicroAPPs 根据接口名获取后端应用列表.

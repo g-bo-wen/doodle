@@ -105,6 +105,12 @@ func (s *sessionDB) User(r *http.Request) (*userinfo, error) {
 		return nil, errors.Trace(err)
 	}
 
+	id, err := userdb.loadUserID(i.Email)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+	i.UserID = id
+
 	s.cache.Add(ticket, i)
 
 	return i, nil

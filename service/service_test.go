@@ -16,7 +16,7 @@ type UserInfo struct {
 }
 
 type UserRequest struct {
-	APIHeader
+	RequestHeader
 	ID   int
 	User UserInfo
 }

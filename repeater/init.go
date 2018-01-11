@@ -20,8 +20,8 @@ var (
 type repeater struct {
 }
 
-// ServerInit 初始化HTTP接口.
-func ServerInit() error {
+// Init 初始化HTTP接口.
+func Init() error {
 	if err := config.Load(); err != nil {
 		return errors.Trace(err)
 	}
@@ -49,4 +49,9 @@ func ServerInit() error {
 	bs = nbs
 
 	return nil
+}
+
+//Stop 结束后端监控.
+func Stop() {
+	bs.stop()
 }
