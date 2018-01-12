@@ -196,7 +196,8 @@ func (t *task) install() error {
 		return errors.Annotatef(err, cmd)
 	}
 
-	cmd = fmt.Sprintf("hostname; tar xzf %s; killall %v; nohup ./%v -etcd 192.168.180.104:12379,192.168.180.104:22379,192.168.180.104:32379 -h : > %v.log 2>&1 &", tarFile, t.project.Name, t.project.Name, t.project.Name)
+	cmd = fmt.Sprintf("hostname; tar xzf %s; killall %v; nohup ./%v -etcd %s -h : > %v.log 2>&1 &",
+		tarFile, t.project.Name, t.project.Name, config.Distributor.ETCD.Hosts, t.project.Name)
 
 	for _, n := range t.project.Cluster.Node {
 		sc, err := ssh.NewClient(n.Server, 22, "jeduser", "", config.Distributor.SSH.Key)

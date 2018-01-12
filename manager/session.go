@@ -9,6 +9,7 @@ import (
 
 	"github.com/dearcode/crab/cache"
 	"github.com/juju/errors"
+	"github.com/zssky/log"
 
 	"github.com/dearcode/doodle/manager/config"
 )
@@ -85,16 +86,20 @@ func (s *sessionDB) User(r *http.Request) (*userinfo, error) {
 		return nil, errors.Trace(err)
 	}
 
+    log.Debugf("ticket:%v", ticket)
 	val := s.cache.Get(ticket)
 	if val != nil {
 		i := val.(*userinfo)
-		return i, i.loadInfo()
+        log.Debugf("cache userinfo:%v", i)
+        return i, i.loadInfo()
 	}
 
 	resp, err := verifyTicket(r, ticket)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
+
+    log.Debugf("verifyTicket userinfo:%+v", resp)
 
 	if !resp.Flag {
 		return nil, fmt.Errorf("invalid Flag, ticket:%+v", resp)
@@ -104,6 +109,7 @@ func (s *sessionDB) User(r *http.Request) (*userinfo, error) {
 	if err = i.loadInfo(); err != nil {
 		return nil, errors.Trace(err)
 	}
+
 
 	id, err := userdb.loadUserID(i.Email)
 	if err != nil {
