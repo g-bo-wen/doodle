@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/coreos/etcd/clientv3"
 	"github.com/juju/errors"
 	"github.com/zssky/log"
 
@@ -25,7 +26,8 @@ var (
 )
 
 type keepalive struct {
-	etcd *etcd.Client
+	etcd  *etcd.Client
+	lease clientv3.Lease
 }
 
 func newKeepalive() *keepalive {
@@ -65,10 +67,13 @@ func (k *keepalive) start(ln net.Listener, doc document) error {
 	p, _ := strconv.Atoi(port)
 	val := meta.NewMicroAPP(local, debug.ServiceKey, p, os.Getpid(), debug.GitHash, debug.GitTime, debug.GitMessage).String()
 
-	if _, err := k.etcd.Keepalive(key, val); err != nil {
+	lease, err := k.etcd.Keepalive(key, val)
+	if err != nil {
 		log.Errorf("etcd Keepalive key:%v, val:%v, error:%v", key, val, errors.ErrorStack(err))
 		return errors.Trace(err)
 	}
+
+	k.lease = lease
 
 	log.Debugf("etcd put key:%v val:%v", key, val)
 
@@ -80,5 +85,6 @@ func (k *keepalive) stop() {
 		return
 	}
 
+	k.lease.Close()
 	k.etcd.Close()
 }

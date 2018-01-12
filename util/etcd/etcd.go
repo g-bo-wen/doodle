@@ -138,7 +138,9 @@ func (e *Client) Keepalive(key, val string) (clientv3.Lease, error) {
 		return nil, errors.Trace(err)
 	}
 
+	ctx, cancel = context.WithTimeout(context.Background(), networkTimeout)
 	pr, err := e.client.Put(context.Background(), key, val, clientv3.WithLease(clientv3.LeaseID(lr.ID)))
+	cancel()
 	if err != nil {
 		lessor.Close()
 		return nil, errors.Trace(err)
@@ -146,10 +148,7 @@ func (e *Client) Keepalive(key, val string) (clientv3.Lease, error) {
 
 	log.Debugf("pr:%v", pr)
 
-	ctx, cancel = context.WithCancel(context.Background())
-	_, err = lessor.KeepAlive(ctx, clientv3.LeaseID(lr.ID))
-	cancel()
-	if err != nil {
+	if _, err = lessor.KeepAlive(ctx, clientv3.LeaseID(lr.ID)); err != nil {
 		lessor.Close()
 		return nil, errors.Trace(err)
 	}
