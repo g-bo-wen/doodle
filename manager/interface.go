@@ -362,24 +362,24 @@ type jsonVariable struct {
 	InterfaceID int64
 	Postion     int
 	Name        string
-	Type        string
-	Required    bool
-	Example     string
-	Comment     string
+	//Level       int
+	Parent   string
+	Type     string
+	Required bool
+	Example  string
+	Comment  string
 }
 
-func (ir *interfaceRegister) addVariable(level int, suffix string, db *sql.DB, interfaceID int64, postion int, fields map[string]document.Field) error {
+func (ir *interfaceRegister) addVariable(level int, parent string, db *sql.DB, interfaceID int64, postion int, fields map[string]document.Field) error {
 	vars := jsonVariable{
 		InterfaceID: interfaceID,
 		Postion:     postion,
+		//	Level:       level,
+		Parent: parent,
 	}
 
 	for _, v := range fields {
-		vars.Name = strings.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;", level) + v.Name
-
-		if suffix != "" {
-			vars.Name += "&nbsp;&nbsp;&nbsp;&nbsp;<mark>" + suffix + "</mark>"
-		}
+		vars.Name = v.Name
 		vars.Comment = v.Comment
 		vars.Type = v.Type
 		vars.Required = v.Required
@@ -411,14 +411,18 @@ func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
 		ProjectID int64
 		User      string
+		State     int
 		Email     string
 		Name      string
+		Version   int64
 		Path      string
 		Method    int
 		Backend   string
 		Comment   string
 		Attr      document.Method `db_default:"auto"`
-	}{}
+	}{
+		State: 1,
+	}
 
 	if err := server.ParseJSONVars(r, &vars); err != nil {
 		log.Errorf("invalid req:%+v", r)

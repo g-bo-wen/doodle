@@ -3,6 +3,7 @@ package distributor
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -92,11 +93,12 @@ func (w *watcher) load() error {
 type managerClient struct {
 }
 
-func (mc *managerClient) interfaceRegister(projectID int64, name, method, path, backend string, m document.Method) error {
+func (mc *managerClient) interfaceRegister(projectID, version int64, name, method, path, backend string, m document.Method) error {
 	url := fmt.Sprintf("%sinterface/register/", config.Distributor.Manager.URL)
 	req := struct {
 		Name      string
 		ProjectID int64
+		Version   int64
 		Path      string
 		Method    server.Method
 		Backend   string
@@ -105,6 +107,7 @@ func (mc *managerClient) interfaceRegister(projectID int64, name, method, path, 
 	}{
 		Name:      name,
 		ProjectID: projectID,
+		Version:   version,
 		Path:      path,
 		Backend:   backend,
 		Method:    server.NewMethod(method),
@@ -158,10 +161,16 @@ func (w *watcher) parseDocument(backend string, app meta.MicroAPP) error {
 		return errors.Annotatef(err, app.ServiceKey)
 	}
 
+	version, err := strconv.ParseInt(app.GitTime, 10, 64)
+	if err != nil {
+		log.Errorf("parse GitTime:%v error:%v", app.GitTime, err)
+		return errors.Annotatef(err, app.GitTime)
+	}
+
 	mc := managerClient{}
 	for ok, ov := range doc {
 		for mk, mv := range ov.Methods {
-			mc.interfaceRegister(projectID, ok+"_"+mk, mk, ov.URL, backend, mv)
+			mc.interfaceRegister(projectID, version, ok+"_"+mk, mk, ov.URL, backend, mv)
 		}
 	}
 

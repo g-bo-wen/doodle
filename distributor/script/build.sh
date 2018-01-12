@@ -33,7 +33,7 @@ function clone_source() {
     cd $base_path;
 
     git_hash=`git log --pretty=format:'%H' -1`
-    git_time=`git log --pretty=format:'%ci' -1`
+    git_time=`git log --pretty=format:'%ct' -1`
     git_message=`git log --pretty=format:'%cn %s %b' -1`
 
     rm -rf .git

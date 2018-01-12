@@ -79,6 +79,11 @@ func (r *repeater) GetInterface(req *http.Request, id string) (app *meta.Applica
 		return nil, nil, fmt.Errorf("invalid method:%v, need:%v", req.Method, iface.Method)
 	}
 
+	//如果不需要验证权限，直接通过
+	if !iface.Project.Validate {
+		log.Debugf("%s project:%v validate is flase, app:%v", id, id, iface.Project, app)
+		return
+	}
 	if err = dc.validateRelation(app.ID, iface.ID); err != nil {
 		log.Errorf("%s validateRelation appId:%v,ifaceId:%v,app email:%v,iface email is:%v", id, app.ID, iface.ID, app.Email, iface.Email)
 		return nil, nil, errors.Trace(err)

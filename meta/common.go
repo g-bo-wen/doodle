@@ -40,6 +40,7 @@ type Project struct {
 	ResourceID int64  `json:"resource_id" `
 	Name       string `json:"name" valid:"Required"`
 	User       string `json:"user" `
+	Validate   bool
 	Email      string `json:"email" `
 	Path       string `json:"path"  valid:"AlphaNumeric"`
 	Source     string `json:"source" `

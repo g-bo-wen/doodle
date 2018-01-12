@@ -63,7 +63,7 @@ func (k *keepalive) start(ln net.Listener, doc document) error {
 	//注册服务，key为当前项目名及IP端口
 	key := apigatePrefix + debug.Project + "/" + local + "/" + port
 	p, _ := strconv.Atoi(port)
-	val := meta.NewMicroAPP(debug.GitHash, local, debug.ServiceKey, p, os.Getpid()).String()
+	val := meta.NewMicroAPP(local, debug.ServiceKey, p, os.Getpid(), debug.GitHash, debug.GitTime, debug.GitMessage).String()
 
 	if _, err := k.etcd.Keepalive(key, val); err != nil {
 		log.Errorf("etcd Keepalive key:%v, val:%v, error:%v", key, val, errors.ErrorStack(err))

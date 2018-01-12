@@ -6,21 +6,25 @@ import (
 
 //MicroAPP 一个函数式应用.
 type MicroAPP struct {
-	Version    string
 	ServiceKey string
 	Host       string
 	Port       int
 	PID        int
+	GitHash    string
+	GitTime    string
+	GitMessage string
 }
 
 //NewMicroAPP 一个应用.
-func NewMicroAPP(version, host, key string, port, pid int) *MicroAPP {
+func NewMicroAPP(host, key string, port, pid int, hash, time, message string) *MicroAPP {
 	return &MicroAPP{
-		Version:    version,
 		ServiceKey: key,
 		PID:        pid,
 		Host:       host,
 		Port:       port,
+		GitHash:    hash,
+		GitTime:    time,
+		GitMessage: message,
 	}
 }
 

@@ -248,7 +248,7 @@ func (s *Stmt) Query(result interface{}) error {
 
 	rows, err := s.db.Query(sql)
 	if err != nil {
-		return errors.Trace(err)
+		return errors.Annotatef(err, sql)
 	}
 	defer rows.Close()
 
@@ -276,6 +276,9 @@ func (s *Stmt) Query(result interface{}) error {
 					for j := 0; j < obj.Field(i).NumField(); j++ {
 						sf := rt.Field(i).Type.Field(j)
 						if sf.PkgPath != "" && !sf.Anonymous { // unexported
+							continue
+						}
+						if sf.Type.Kind() == reflect.Slice {
 							continue
 						}
 
@@ -309,7 +312,6 @@ func (s *Stmt) Query(result interface{}) error {
 
 			switch f.Tag.Get("db_table") {
 			case "more":
-
 				//填充一对多结果，每次去查询
 				if err = NewStmt(s.db, util.FieldEscape(f.Name)).addRelation(f.Name, s.firstTable(), id).Query(lr); err != nil {
 					if errors.Cause(err) != meta.ErrNotFound {

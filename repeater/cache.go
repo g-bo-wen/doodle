@@ -67,7 +67,7 @@ func (dc *dbCache) conectDB() error {
 		return errors.Trace(err)
 	}
 
-	if dc.selProject, err = dc.dbc.Prepare("select id, version from project where path=?"); err != nil {
+	if dc.selProject, err = dc.dbc.Prepare("select id, validate, version from project where path=?"); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -182,7 +182,7 @@ func (dc *dbCache) getInterface(key string) (*meta.Interface, error) {
 	}
 
 	p := meta.Project{}
-	if err := dc.queryDB(dc.selProject, []interface{}{ps[1]}, []interface{}{&p.ID, &p.Version}); err != nil {
+	if err := dc.queryDB(dc.selProject, []interface{}{ps[1]}, []interface{}{&p.ID, &p.Validate, &p.Version}); err != nil {
 		return nil, errors.Trace(err)
 	}
 
