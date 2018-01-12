@@ -244,7 +244,7 @@ func (t *task) compile() error {
 	}
 	defer os.Chdir(oldPath)
 
-	cmd := fmt.Sprintf("./build.sh %s %s", t.project.Source, t.project.key())
+	cmd := fmt.Sprintf("./build.sh %s %s %s", t.project.Source, t.project.key(), t.project.Name)
 
 	if err = execSystemCmdWait(cmd, t.writeLogs); err != nil {
 		return errors.Annotatef(err, cmd)

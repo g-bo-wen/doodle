@@ -6,6 +6,7 @@ IFS=$'\n'
 
 url=$1
 key=$2
+name=$3
 
 framework_package="github.com/dearcode/doodle/service"
 
@@ -24,10 +25,11 @@ function create_path() {
 
 function clone_source() {
     cd $base_path;
-    git clone --depth=1 $url;
+    git clone --depth=1 $url || true;
+    git clone --depth=1 $url || true;
     cd -;
 
-    app=`echo $url|xargs basename -s .git`;
+    app=`basename "$url" .git`;
     base_path=$base_path/$app;
 
     cd $base_path;
@@ -97,6 +99,12 @@ function build() {
 }
 
 
+function rename_project_file() {
+    local src=`basename $project`
+    local dest=$name
+    mv bin/$src bin/$dest
+}
+
 convert_url
 
 create_path
@@ -108,3 +116,6 @@ generate_document
 create_dockerfile
 
 build
+
+rename_project_file
+
