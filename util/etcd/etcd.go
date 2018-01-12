@@ -64,11 +64,6 @@ func (e *Client) List(prefix string) (map[string]string, error) {
 		return nil, errors.Trace(err)
 	}
 
-	if len(resp.Kvs) == 0 {
-		log.Debugf("prefix:%s value not found", prefix)
-		return nil, errors.New("not found")
-	}
-
 	keys := make(map[string]string)
 	for _, k := range resp.Kvs {
 		keys[string(k.Key)] = string(k.Value)
@@ -143,9 +138,7 @@ func (e *Client) Keepalive(key, val string) (clientv3.Lease, error) {
 		return nil, errors.Trace(err)
 	}
 
-	ctx, cancel = context.WithTimeout(context.Background(), networkTimeout)
-	pr, err := e.client.Put(ctx, key, val, clientv3.WithLease(clientv3.LeaseID(lr.ID)))
-	cancel()
+	pr, err := e.client.Put(context.Background(), key, val, clientv3.WithLease(clientv3.LeaseID(lr.ID)))
 	if err != nil {
 		lessor.Close()
 		return nil, errors.Trace(err)
@@ -169,5 +162,6 @@ func (e *Client) Keepalive(key, val string) (clientv3.Lease, error) {
 
 // Close 关闭客户端
 func (e *Client) Close() {
+	log.Debugf("client close")
 	e.client.Close()
 }
