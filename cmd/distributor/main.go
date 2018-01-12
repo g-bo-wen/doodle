@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	addr       = flag.String("h", ":9300", "api listen address")
+	addr       = flag.String("h", ":8300", "api listen address")
 	debug      = flag.Bool("debug", false, "debug write log to console.")
 	version    = flag.Bool("v", false, "show version info")
 	configPath = flag.String("c", "./config/distributor.ini", "config file")
@@ -32,7 +32,7 @@ func main() {
 	}
 
 	if !*debug {
-		log.SetOutputByName("./logs/api.log")
+		log.SetOutputByName("./logs/distributor.log")
 		log.SetHighlighting(false)
 		log.SetRotateByDay()
 	}

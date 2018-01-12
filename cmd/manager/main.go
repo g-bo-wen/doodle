@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	addr    = flag.String("h", ":9200", "listen address")
+	addr    = flag.String("h", ":8200", "listen address")
 	debug   = flag.Bool("debug", false, "debug write log to console.")
 	version = flag.Bool("v", false, "show version info")
 )
@@ -30,7 +30,7 @@ func main() {
 	}
 
 	if !*debug {
-		log.SetOutputByName("./logs/api.log")
+		log.SetOutputByName("./logs/manager.log")
 		log.SetHighlighting(false)
 		log.SetRotateByDay()
 	}

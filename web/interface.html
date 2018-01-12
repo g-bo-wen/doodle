@@ -134,25 +134,20 @@
                         data-url="service/"
                         data-pagination="true"
                         data-side-pagination="client"
-                        data-sort-order="desc"
                         data-page-list="[10, 20, 50, 100, 200]"
                         data-query-params="queryServiceParams"
                         style="word-break:break-all; word-wrap:break-all;"
                         >
                         <thead>
                             <tr>
-                                <th data-field='Host'>服务器</th>
-                                <th data-field='Port'>端口</th>
+                                <th data-formatter="serverFormatter" >服务器</th>
                                 <th data-field='PID'>进程号</th>
-                                <th data-field='Version'>版本号</th>
+                                <th data-formatter="gittimeFormatter" >源码提交时间</th>
+                                <th data-field='GitMessage'>源码提交信息</th>
                             </tr>
                         </thead>
 
                     </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">放弃</button>
-                    <button type="button" class="btn btn-primary" onclick="submitInterface()">确定</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -160,6 +155,13 @@
 </div>
 <script>
     var projectID = requestParse("projectID");
+
+    function serverFormatter(value, row, index) {
+        return '<a target="_blank" href="http://'+row.Host+":"+row.Port+'/doc/" >'+row.Host+'</a>';
+    }
+    function gittimeFormatter(value, row, index) {
+        return new Date(row.GitTime* 1000).Format("yyyy-MM-dd hh:mm:ss");
+    }
 
     //添加到接口的链接
     function nameFormatter(value, row, index) {

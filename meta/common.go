@@ -56,6 +56,7 @@ type Variable struct {
 	Postion  server.VariablePostion
 	Name     string
 	Type     string
+	Level    int
 	Required bool
 	Example  string
 	Comment  string

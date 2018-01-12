@@ -23,14 +23,14 @@
         data-pagination="true"
         data-side-pagination="server"
         data-sort-order="desc"
-        data-page-list="[5, 10, 20, 50, 100, 200]"
+        data-page-list="[10, 20, 50]"
         data-query-params="queryParams"
         data-row-style="rowStyle"
         style="word-break:break-all; word-wrap:break-all;"
         >
         <thead>
             <tr>
-                <th data-field='Name' data-sortable="true" >参数名</th>
+                <th data-formatter="variableNameFormatter" data-sortable="true" >参数名</th>
                 <th data-field='Postion' data-sortable="true">参数位置</th>
                 <th data-field='Type' data-sortable="true">类型</th>
                 <th data-field='Required' data-sortable="true">必填</th>
@@ -167,6 +167,10 @@
     function actionFormatter(value, row, index) {
         return '<a class="edit glyphicon glyphicon-pencil" href="javascript:void(0)" title="修改"></a>' +
         '&nbsp;&nbsp;<a class="delete glyphicon glyphicon-trash" href="javascript:void(0)" title="删除"></a>' ;
+    }
+
+    function variableNameFormatter(value, row, index) {
+        return "&nbsp;&nbsp;&minus;&nbsp;&nbsp;".repeat(row.Level)  +  row.Name;
     }
 
     $('#variable_dialog').on('hidden.bs.modal', function (e) {

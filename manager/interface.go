@@ -362,20 +362,20 @@ type jsonVariable struct {
 	InterfaceID int64
 	Postion     int
 	Name        string
-	//Level       int
-	Parent   string
-	Type     string
-	Required bool
-	Example  string
-	Comment  string
+	Level       int
+	Parent      string
+	Type        string
+	Required    bool
+	Example     string
+	Comment     string
 }
 
 func (ir *interfaceRegister) addVariable(level int, parent string, db *sql.DB, interfaceID int64, postion int, fields map[string]document.Field) error {
 	vars := jsonVariable{
 		InterfaceID: interfaceID,
 		Postion:     postion,
-		//	Level:       level,
-		Parent: parent,
+		Level:       level,
+		Parent:      parent,
 	}
 
 	for _, v := range fields {
@@ -438,22 +438,48 @@ func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	var p meta.Project
+
+	if err = orm.NewStmt(db, "project").Where("id=%v", vars.ProjectID).Query(&p); err != nil {
+		log.Errorf("Query project:%v error:%v", vars.ProjectID, errors.ErrorStack(err))
+		response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
+		return
+	}
+
 	if vars.Email == "" {
-		var p meta.Project
-		if err = orm.NewStmt(db, "project").Where("id=%v", vars.ProjectID).Query(&p); err != nil {
-			log.Errorf("Query project:%v error:%v", vars.ProjectID, errors.ErrorStack(err))
-			response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
-			return
-		}
 		vars.User = p.User
 		vars.Email = p.Email
 	}
 
 	id, err := orm.NewStmt(db, "interface").Insert(&vars)
 	if err != nil {
-		log.Errorf("insert interface:%+v, error:%v", vars, err)
-		server.SendResponse(w, http.StatusInternalServerError, err.Error())
-		return
+		if !strings.Contains(err.Error(), "Error 1062: Duplicate entry") {
+			log.Errorf("insert interface:%+v, error:%v", vars, err)
+			server.SendResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		var i meta.Interface
+		if err = orm.NewStmt(db, "interface").Where("project_id=%d and interface.path='%s' and method=%d", vars.ProjectID, vars.Path, vars.Method).Query(&i); err != nil {
+			log.Errorf("query interface:%+v, error:%v", vars, err)
+			server.SendResponse(w, http.StatusInternalServerError, err.Error())
+			return
+
+		}
+
+		id = i.ID
+
+		if _, err = orm.NewStmt(db, "interface").Where("id=%d", id).Update(&vars); err != nil {
+			log.Errorf("interface:%+v, error:%v", vars, err)
+			server.SendResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if _, err = orm.NewStmt(db, "variable").Exec("delete from variable where interface_id=?", id); err != nil {
+			log.Errorf("clear variable:%+v, error:%v", vars, err)
+			server.SendResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	if err = ir.addVariable(0, "", db, id, postionRequestJSON, vars.Attr.Request); err != nil {

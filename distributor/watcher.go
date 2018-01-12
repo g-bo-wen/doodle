@@ -182,9 +182,11 @@ func (w *watcher) register(backend string, app meta.MicroAPP) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
-	if _, ok := w.apps[backend]; ok {
-		log.Debugf("app:%+v exist", app)
-		return
+	if o, ok := w.apps[backend]; ok {
+		if app.GitTime == o.GitTime {
+			log.Debugf("app:%+v exist", app)
+			return
+		}
 	}
 
 	w.apps[backend] = app
