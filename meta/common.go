@@ -38,6 +38,7 @@ type Project struct {
 	ID         int64  `json:"id" db_default:"auto"`
 	RoleID     int64  `json:"role_id" `
 	ResourceID int64  `json:"resource_id" `
+	ClusterID  int64  `json:"cluster_id"`
 	Name       string `json:"name" valid:"Required"`
 	User       string `json:"user" `
 	Validate   bool
