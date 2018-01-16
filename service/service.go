@@ -91,8 +91,12 @@ func (s *Service) Register(obj interface{}) error {
 
 	pkg = strings.TrimPrefix(pkg, debug.Project)
 
+	if pkg == "main" {
+		pkg = ""
+	}
+
 	url := fmt.Sprintf("%s/%s/", pkg, name)
-    log.Debugf("url:%v", url)
+	log.Debugf("url:%v", url)
 
 	for _, k := range []string{"Get", "Post", "Put", "Delete"} {
 		if m, ok := t.MethodByName(k); ok {

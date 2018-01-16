@@ -54,7 +54,7 @@ func (d *distributor) GET(w http.ResponseWriter, r *http.Request) {
 //POST 编译并更新指定项目.
 func (d *distributor) POST(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
-        ProjectID int64 `json:"id"`
+		ProjectID int64 `json:"id"`
 	}{}
 
 	if err := server.ParseURLVars(r, &vars); err != nil {
