@@ -50,7 +50,7 @@ func (p *project) GET(w http.ResponseWriter, r *http.Request) {
 
 	log.Debugf("project:%+v, id:%v", p, vars.ID)
 
-	c, err := etcd.New(strings.Split(config.Distributor.ETCD.Hosts, ","))
+	c, err := etcd.New(config.Distributor.ETCD.Hosts)
 	if err != nil {
 		log.Errorf("etcd connect:%s error:%v", config.Distributor.ETCD.Hosts, err.Error())
 		server.SendResponse(w, http.StatusInternalServerError, err.Error())

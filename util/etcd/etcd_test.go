@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -15,7 +16,7 @@ var (
 )
 
 func TestAddKey(t *testing.T) {
-	c, err := New(testCluster)
+	c, err := New(testCluster...)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -28,7 +29,7 @@ func TestAddKey(t *testing.T) {
 }
 
 func TestWatchKey(t *testing.T) {
-	c, err := New(testCluster)
+	c, err := New(testCluster...)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -54,7 +55,7 @@ func TestWatchKey(t *testing.T) {
 }
 
 func TestGetKey(t *testing.T) {
-	c, err := New(testCluster)
+	c, err := New(testCluster...)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -74,4 +75,26 @@ func TestGetKey(t *testing.T) {
 		t.Fatalf("key:%v, expect:%v, recv:%v", testKey, v, v2)
 	}
 
+}
+
+func TestAddrs(t *testing.T) {
+	data := []struct {
+		input  []string
+		output []string
+	}{
+		{[]string{"1.1.1.1,2.2.2.2", "3.3.3.3", "4.4.4.4"}, []string{"1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4"}},
+		{[]string{"1.1.1.1,2.2.2.2,3.3.3.3, 4.4.4.4"}, []string{"1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4"}},
+		{[]string{"1.1.1.1 , 2.2.2.2,3.3.3.3, 4.4.4.4"}, []string{"1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4"}},
+		{[]string{"1.1.1.1,2.2.2.2 ", " 3.3.3.3, 4.4.4.4"}, []string{"1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4"}},
+		{[]string{"1.1.1.1"}, []string{"1.1.1.1"}},
+		{[]string{" 1.1.1.1 "}, []string{"1.1.1.1"}},
+	}
+
+	for _, d := range data {
+		addrs := etcdAddrs(d.input...)
+		t.Logf("addrs:%#v", addrs)
+		if !reflect.DeepEqual(addrs, d.output) {
+			t.Fatalf("input:%+v, expect:%+v, recv:%+v", d.input, d.output, addrs)
+		}
+	}
 }

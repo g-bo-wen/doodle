@@ -31,7 +31,7 @@ type watcher struct {
 }
 
 func newWatcher() (*watcher, error) {
-	c, err := etcd.New(strings.Split(config.Distributor.ETCD.Hosts, ","))
+	c, err := etcd.New(config.Distributor.ETCD.Hosts)
 	if err != nil {
 		return nil, errors.Annotatef(err, config.Distributor.ETCD.Hosts)
 	}

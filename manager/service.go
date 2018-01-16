@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/dearcode/crab/http/server"
 	"github.com/dearcode/crab/orm"
@@ -51,7 +50,7 @@ func (s *service) GET(w http.ResponseWriter, r *http.Request) {
 
 	// source http://git.jd.com/dbs/faas_test_001
 	key := etcdAPIPrefix + p.Source[6:]
-	e, err := etcd.New(strings.Split(config.Manager.ETCD.Hosts, ","))
+	e, err := etcd.New(config.Manager.ETCD.Hosts)
 	if err != nil {
 		log.Errorf("connect etcd:%v error:%v", config.Manager.ETCD.Hosts, errors.ErrorStack(err))
 		response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})

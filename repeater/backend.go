@@ -26,7 +26,7 @@ type backendService struct {
 }
 
 func newBackendService() (*backendService, error) {
-	c, err := etcd.New(strings.Split(config.Repeater.ETCD.Hosts, ","))
+	c, err := etcd.New(config.Repeater.ETCD.Hosts)
 	if err != nil {
 		return nil, errors.Annotatef(err, config.Repeater.ETCD.Hosts)
 	}

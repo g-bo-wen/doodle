@@ -38,11 +38,11 @@ type Service struct {
 }
 
 var (
-	host     = flag.String("h", ":8080", "listen address.")
-	version  = flag.Bool("v", false, "version info.")
-	logLevel = flag.String("logLevel", "debug", "log level: fatal, error, warning, debug, info.")
-	logFile  = flag.String("logFile", "", "log file name.")
-
+	host        = flag.String("h", ":8080", "listen address.")
+	version     = flag.Bool("v", false, "version info.")
+	logLevel    = flag.String("logLevel", "debug", "log level: fatal, error, warning, debug, info.")
+	logFile     = flag.String("logFile", "", "log file name.")
+	etcdAddrs   = flag.String("etcd", "", "etcd Endpoints, like 192.168.180.104:12379,192.168.180.104:22379,192.168.180.104:32379.")
 	maxWaitTime = time.Hour * 24 * 7
 )
 
@@ -90,7 +90,6 @@ func (s *Service) Register(obj interface{}) error {
 	}
 
 	pkg = strings.TrimPrefix(pkg, debug.Project)
-
 	if pkg == "main" {
 		pkg = ""
 	}
@@ -126,9 +125,9 @@ func (s *Service) Start() {
 		panic(err)
 	}
 
-	keepalive := newKeepalive()
 	//第二步，注册到接口平台API接口队列中.
-	if err := keepalive.start(ln, s.doc); err != nil {
+	keepalive, err := newKeepalive(*etcdAddrs, ln.Addr().String())
+	if err != nil {
 		log.Errorf("apiRegister error:%v", errors.ErrorStack(err))
 		panic(err)
 	}

@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
@@ -24,14 +25,27 @@ var (
 	networkTimeout = time.Second * 3
 )
 
+func etcdAddrs(addr ...string) []string {
+	var addrs []string
+	for _, a := range addr {
+		for _, s := range strings.Split(a, ",") {
+			if s = strings.TrimSpace(s); len(s) > 0 {
+				addrs = append(addrs, s)
+			}
+		}
+	}
+
+	return addrs
+}
+
 // New new etcd client.
-func New(addrs []string) (*Client, error) {
+func New(addr ...string) (*Client, error) {
 	c, err := clientv3.New(clientv3.Config{
-		Endpoints:   addrs,
+		Endpoints:   etcdAddrs(addr...),
 		DialTimeout: networkTimeout,
 	})
 	if err != nil {
-		return nil, errors.Annotatef(err, "addrs:%+v", addrs)
+		return nil, errors.Annotatef(err, "addrs:%+v", addr)
 	}
 
 	return &Client{client: c}, nil

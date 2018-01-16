@@ -16,7 +16,7 @@ type MicroAPP struct {
 }
 
 //NewMicroAPP 一个应用.
-func NewMicroAPP(host, key string, port, pid int, hash, time, message string) *MicroAPP {
+func NewMicroAPP(host string, port int, key string, pid int, hash, time, message string) *MicroAPP {
 	return &MicroAPP{
 		ServiceKey: key,
 		PID:        pid,

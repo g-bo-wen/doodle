@@ -1,8 +1,7 @@
 package service
 
 import (
-	"flag"
-	"net"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -21,63 +20,47 @@ const (
 	apigatePrefix = "/api/"
 )
 
-var (
-	etcdAddrs = flag.String("etcd", "", "etcd Endpoints, like 192.168.180.104:12379,192.168.180.104:22379,192.168.180.104:32379.")
-)
-
 type keepalive struct {
 	etcd  *etcd.Client
 	lease clientv3.Lease
 }
 
-func newKeepalive() *keepalive {
-	if *etcdAddrs == "" {
-		return nil
-	}
-
-	//清理输入ip列表.
-	addrs := strings.Split(*etcdAddrs, ",")
-	for i := range addrs {
-		addrs[i] = strings.TrimSpace(addrs[i])
-	}
-
-	//连接etcd.
-	c, err := etcd.New(addrs)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return &keepalive{etcd: c}
+//apiKey 为当前项目名及IP端口
+func apiKey(local string, port int) string {
+	return fmt.Sprintf("%s%s/%s/%d", apigatePrefix, debug.Project, local, port)
 }
 
-// register 服务上线，注册到接口平台的etcd.
-func (k *keepalive) start(ln net.Listener, doc document) error {
-	if k == nil {
-		return nil
-	}
-
+func bindInfo(bind string) (string, int) {
 	// 获取本机服务地址
 	local := util.LocalAddr()
-
-	la := ln.Addr().String()
-	port := la[strings.LastIndex(la, ":")+1:]
-
-	//注册服务，key为当前项目名及IP端口
-	key := apigatePrefix + debug.Project + "/" + local + "/" + port
+	port := bind[strings.LastIndex(bind, ":")+1:]
 	p, _ := strconv.Atoi(port)
-	val := meta.NewMicroAPP(local, debug.ServiceKey, p, os.Getpid(), debug.GitHash, debug.GitTime, debug.GitMessage).String()
 
-	lease, err := k.etcd.Keepalive(key, val)
+	return local, p
+}
+
+// newKeepalive 服务上线，注册到接口平台的etcd.
+func newKeepalive(etcdAddr, bind string) (*keepalive, error) {
+	c, err := etcd.New(etcdAddr)
 	if err != nil {
-		log.Errorf("etcd Keepalive key:%v, val:%v, error:%v", key, val, errors.ErrorStack(err))
-		return errors.Trace(err)
+		return nil, errors.Annotatef(err, etcdAddr)
 	}
 
-	k.lease = lease
+	local, port := bindInfo(bind)
+
+	key := apiKey(local, port)
+	val := meta.NewMicroAPP(local, port, debug.ServiceKey, os.Getpid(), debug.GitHash, debug.GitTime, debug.GitMessage).String()
+
+	lease, err := c.Keepalive(key, val)
+	if err != nil {
+		log.Errorf("etcd Keepalive key:%v, val:%v, error:%v", key, val, errors.ErrorStack(err))
+		c.Close()
+		return nil, errors.Trace(err)
+	}
 
 	log.Debugf("etcd put key:%v val:%v", key, val)
 
-	return nil
+	return &keepalive{etcd: c, lease: lease}, nil
 }
 
 func (k *keepalive) stop() {
