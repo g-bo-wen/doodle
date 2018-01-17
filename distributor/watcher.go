@@ -84,7 +84,7 @@ func (w *watcher) load() error {
 		// k = /api/git.jd.com/dbs/faas_test_001/192.168.137.222/41596
 		ss := strings.Split(k, "/")
 		if len(ss) < 4 {
-			log.Errorf("invalid key:%s", k)
+			log.Debugf("invalid key:%s", k)
 			continue
 		}
 

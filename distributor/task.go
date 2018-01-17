@@ -110,7 +110,10 @@ func (t *task) logStream(reader io.ReadCloser) {
 	r := bufio.NewReader(reader)
 	for {
 		line, _, err := r.ReadLine()
-		if err != nil && err != io.EOF {
+		if err != nil {
+			if err == io.EOF {
+				return
+			} //} || strings.Contains(err.Error(), "
 			log.Debugf("%v ReadLine %v", t, err)
 			return
 		}
