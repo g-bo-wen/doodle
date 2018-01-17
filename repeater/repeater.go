@@ -225,12 +225,14 @@ func (r *repeater) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//查找对应接口信息
 	app, iface, err := r.GetInterface(req, id)
 	if err != nil {
-		log.Errorf("%s GetInterface error:%s, req:%v", id, errors.ErrorStack(err), *req)
 		if errors.Cause(err) == errForbidden {
+			log.Errorf("%s forbidden", id)
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		util.SendResponse(w, http.StatusBadRequest, err.Error())
+		log.Errorf("%s GetInterface error:%s, req:%v", id, errors.ErrorStack(err), *req)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 	log.Infof("%s GetInterface success,app:%s,ifaceName:%s,ifacePath:%s", id, app.Name, iface.Name, iface.Path)
