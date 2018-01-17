@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -111,9 +112,9 @@ func (t *task) logStream(reader io.ReadCloser) {
 	for {
 		line, _, err := r.ReadLine()
 		if err != nil {
-			if err == io.EOF {
+			if err == io.EOF || strings.Contains(err.Error(), "file already closed") {
 				return
-			} //} || strings.Contains(err.Error(), "
+			}
 			log.Debugf("%v ReadLine %v", t, err)
 			return
 		}
