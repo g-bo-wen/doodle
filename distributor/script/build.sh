@@ -102,7 +102,10 @@ function build() {
 function rename_project_file() {
     local src=`basename $project`
     local dest=$name
-    mv bin/$src bin/$dest || true
+    if [ ! "$src" == "$dest" ]
+    then
+        mv bin/$src bin/$dest 
+    fi
 }
 
 convert_url

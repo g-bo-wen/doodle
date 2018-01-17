@@ -84,12 +84,18 @@ func (r *repeater) GetInterface(req *http.Request, id string) (app *meta.Applica
 		log.Debugf("%s project:%v validate is flase, app:%v", id, id, iface.Project, app)
 		return
 	}
-	if err = dc.validateRelation(app.ID, iface.ID); err != nil {
-		log.Errorf("%s validateRelation appId:%v,ifaceId:%v,app email:%v,iface email is:%v", id, app.ID, iface.ID, app.Email, iface.Email)
-		return nil, nil, errors.Trace(err)
+
+	if err = dc.validateRelation(app.ID, iface.ID); err == nil {
+		log.Debugf("%s project:%v iface:%v app:%v", id, iface, app)
+		return
 	}
 
-	return
+	if errors.Cause(err) == errNotFound {
+		return nil, nil, errors.Trace(errForbidden)
+	}
+
+	log.Errorf("%s validateRelation appId:%v,ifaceId:%v,app email:%v,iface email is:%v", id, app.ID, iface.ID, app.Email, iface.Email)
+	return nil, nil, errors.Trace(err)
 }
 
 func (r *repeater) parseForm(req *http.Request, vars []*meta.Variable) error {
@@ -220,6 +226,10 @@ func (r *repeater) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	app, iface, err := r.GetInterface(req, id)
 	if err != nil {
 		log.Errorf("%s GetInterface error:%s, req:%v", id, errors.ErrorStack(err), *req)
+		if errors.Cause(err) == errForbidden {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
 		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}

@@ -111,7 +111,7 @@ func (t *task) writeLogStream(reader io.ReadCloser) {
 	for {
 		line, _, err := r.ReadLine()
 		if err != nil {
-			if err == io.EOF {
+			if err == io.EOF || err == os.ErrClosed {
 				return
 			}
 			log.Errorf("%v read error:%v", t, err)

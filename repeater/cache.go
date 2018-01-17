@@ -94,6 +94,7 @@ var (
 	errInvalidPath  = errors.New("invalid path")
 	errInvalidToken = errors.New("invalid token")
 	errNotFound     = errors.New("not found")
+	errForbidden    = errors.New("forbidden")
 )
 
 const (

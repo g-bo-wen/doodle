@@ -15,9 +15,14 @@ function project_init() {
 
 
 function send_close_signal() {
-    pgrep_pid=`pgrep $project`
+    if [ $pid == 0 ] 
+    then
+        return
+    fi
 
-    if [[ "$pgrep_pid" =~ "$pid" ]]
+    pgrep_pid=`pgrep $project|grep $pid`
+
+    if [[ "$pgrep_pid" == "$pid" ]]
     then
         echo "send close signal $pid"
         kill -s SIGUSR1 $pid
