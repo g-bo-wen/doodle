@@ -91,7 +91,7 @@ func (s *Service) Register(obj interface{}) error {
 
 	pkg = strings.TrimPrefix(pkg, debug.Project)
 	if pkg == "main" {
-		pkg = "/main"
+		pkg = ""
 	}
 
 	url := fmt.Sprintf("%s/%s/", pkg, name)
