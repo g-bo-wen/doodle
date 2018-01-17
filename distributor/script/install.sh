@@ -2,8 +2,7 @@
 
 
 project=$1
-pid=$1
-port=$2
+pid=$2
 etcd=$3
 
 
@@ -11,22 +10,23 @@ function project_init() {
     mkdir -p $project/bin
     mkdir -p $project/logs
     mkdir -p $project/config
+    mv $project.tar.gz $project
 }
 
 
 function send_close_signal() {
     pgrep_pid=`pgrep $project`
-    port_pid=`netstat -ntpl|awk "/$port/{print $NF}"|awk -F/ '{print $1}'`
 
-    if [ $pgrep_pid == $port_pid ];
+    if [[ "$pgrep_pid" =~ "$pid" ]]
     then
+        echo "send close signal $pid"
         kill -s SIGUSR1 $pid
     fi
 }
 
 
 function extract_project() {
-    tar xzf -C bin $project.tar.gz; 
+    tar xzf $project.tar.gz -C bin
 }
 
 function daemon_start() {
@@ -34,9 +34,10 @@ function daemon_start() {
 }
 
 
-cd $project
 
 project_init
+
+cd $project
 
 extract_project
 

@@ -34,7 +34,7 @@ const (
 )
 
 var (
-	scripts = []string{"build.sh", "Dockerfile.tpl"}
+	scripts = []string{"build.sh", "Dockerfile.tpl", "install.sh"}
 )
 
 type task struct {
@@ -196,14 +196,22 @@ func (t *task) install() error {
 		return errors.Annotatef(err, cmd)
 	}
 
-	cmd = fmt.Sprintf("hostname; tar xzf %s; killall %v; nohup ./%v -etcd %s -h : > %v.log 2>&1 &",
-		tarFile, t.project.Name, t.project.Name, config.Distributor.ETCD.Hosts, t.project.Name)
+	key := t.project.Source[7:]
 
 	for _, n := range t.project.Cluster.Node {
+		app := w.get(key, n.Server)
+		cmd = fmt.Sprintf("./install.sh %s %d %s", t.project.Name, app.PID, config.Distributor.ETCD.Hosts)
 		sc, err := ssh.NewClient(n.Server, 22, "jeduser", "", config.Distributor.SSH.Key)
 		if err != nil {
 			return errors.Trace(err)
 		}
+
+		log.Debugf("%v begin, upload install script", t)
+		if err = sc.Upload("./install.sh", "install.sh"); err != nil {
+			return errors.Annotatef(err, "install.sh")
+		}
+		log.Debugf("%v end, upload install script", t)
+
 		log.Debugf("%v begin, upload file:%v", t, tarFile)
 		if err = sc.Upload(tarFile, tarFile); err != nil {
 			return errors.Trace(err)

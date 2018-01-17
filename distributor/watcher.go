@@ -24,10 +24,15 @@ const (
 	apigatePrefix = "/api"
 )
 
+type service struct {
+	version int64
+	nodes   map[string]meta.MicroAPP
+}
+
 type watcher struct {
-	etcd *etcd.Client
-	apps map[string]meta.MicroAPP
-	mu   sync.RWMutex
+	etcd     *etcd.Client
+	services map[string]service
+	mu       sync.RWMutex
 }
 
 func newWatcher() (*watcher, error) {
@@ -36,7 +41,7 @@ func newWatcher() (*watcher, error) {
 		return nil, errors.Annotatef(err, config.Distributor.ETCD.Hosts)
 	}
 
-	return &watcher{etcd: c, apps: make(map[string]meta.MicroAPP)}, nil
+	return &watcher{etcd: c, services: make(map[string]service)}, nil
 }
 
 func (w *watcher) start() {
@@ -52,16 +57,18 @@ func (w *watcher) start() {
 				continue
 			}
 
-			if e.Type != clientv3.EventTypePut {
-				log.Infof("ignore event:%+v", e)
+			name := strings.Join(ss[2:len(ss)-2], "/")
+			host := ss[len(ss)-2]
+
+			if e.Type == clientv3.EventTypeDelete {
+				w.offline(name, host)
 				continue
 			}
 
-			name := strings.Join(ss[2:len(ss)-2], "/")
-
 			app := meta.MicroAPP{}
 			json.Unmarshal(e.Kv.Value, &app)
-			w.register(name, app)
+
+			w.online(name, app)
 		}
 	}
 }
@@ -84,7 +91,7 @@ func (w *watcher) load() error {
 		name := strings.Join(ss[2:len(ss)-2], "/")
 		app := meta.MicroAPP{}
 		json.Unmarshal([]byte(v), &app)
-		w.register(name, app)
+		w.online(name, app)
 	}
 
 	return nil
@@ -177,19 +184,31 @@ func (w *watcher) parseDocument(backend string, app meta.MicroAPP) error {
 	return nil
 }
 
-//register 到管理处添加接口, 肯定是多个Distributor同时上报的，所以添加操作要指定版本信息.
-func (w *watcher) register(backend string, app meta.MicroAPP) {
+//online 到管理处添加接口, 肯定是多个Distributor同时上报的，所以添加操作要指定版本信息.
+func (w *watcher) online(backend string, app meta.MicroAPP) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
-	if o, ok := w.apps[backend]; ok {
-		if app.GitTime == o.GitTime {
+	o, ok := w.services[backend]
+	if ok {
+		o.nodes[app.Host] = app
+		log.Debugf("backend:%v, add host:%v", backend, app.Host)
+
+		//如果是版本未变或旧版本就添加到节点列表中就返回.
+		if app.Version() <= o.version {
 			log.Debugf("app:%+v exist", app)
 			return
 		}
+
+	} else {
+		//如果后端接口不存在, 添加、注册
+		o = service{nodes: make(map[string]meta.MicroAPP)}
+		o.nodes[app.Host] = app
+		log.Debugf("backend:%v, add host:%v, new app", backend, app.Host)
 	}
 
-	w.apps[backend] = app
+	o.version = app.Version()
+	w.services[backend] = o
 	w.parseDocument(backend, app)
 	log.Debugf("new backend:%s, app:%+v", backend, app)
 }
@@ -214,4 +233,37 @@ func parseProjectID(key string) (int64, error) {
 	}
 
 	return id, nil
+}
+
+func (w *watcher) get(name, host string) meta.MicroAPP {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+
+	s, ok := w.services[name]
+	if !ok {
+		log.Debugf("not found name:%v", name)
+		return meta.MicroAPP{}
+	}
+
+	a, ok := s.nodes[host]
+	if !ok {
+		log.Debugf("not found name:%v, host:%v", name, host)
+		return meta.MicroAPP{}
+	}
+	return a
+}
+
+func (w *watcher) offline(name, host string) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	s, ok := w.services[name]
+	if !ok {
+		log.Infof("name:%v not found", name)
+		return
+	}
+
+	log.Infof("name:%v, host:%v", name, host)
+
+	delete(s.nodes, host)
 }
