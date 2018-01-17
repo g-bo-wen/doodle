@@ -25,8 +25,7 @@ function create_path() {
 
 function clone_source() {
     cd $base_path;
-    git clone --depth=1 $url || true;
-    git clone --depth=1 $url || true;
+    git clone --depth=1 $url
     cd -;
 
     app=`basename "$url" .git`;
