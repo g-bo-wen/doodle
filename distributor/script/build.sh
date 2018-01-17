@@ -94,19 +94,12 @@ function create_dockerfile() {
 function build() {
     version=`date -d @"$git_time" +%Y%m%d.%H%M`
     image="$project:$version"
-    docker build --no-cache -t $image .
-    docker run -i --rm -v $PWD/bin:/base $image bash -c 'cp $GOPATH/bin/* /base/' 
-}
-
-
-function rename_project_file() {
     local src=`basename $project`
     local dest=$name
-    if [ ! "$src" == "$dest" ]
-    then
-        mv bin/$src bin/$dest 
-    fi
+    docker build --no-cache -t $image .
+    docker run -i --rm -v $PWD/bin:/base $image bash -c 'cp $GOPATH/bin/'$src' /base/'$dest 
 }
+
 
 convert_url
 
@@ -119,6 +112,4 @@ generate_document
 create_dockerfile
 
 build
-
-rename_project_file
 

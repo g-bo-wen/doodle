@@ -104,17 +104,14 @@ func (t *task) String() string {
 	return t.ID
 }
 
-func (t *task) writeLogStream(reader io.ReadCloser) {
+func (t *task) logStream(reader io.ReadCloser) {
 	defer t.wg.Done()
 
 	r := bufio.NewReader(reader)
 	for {
 		line, _, err := r.ReadLine()
-		if err != nil {
-			if err == io.EOF || err == os.ErrClosed {
-				return
-			}
-			log.Errorf("%v read error:%v", t, err)
+		if err != nil && err != io.EOF {
+			log.Debugf("%v ReadLine %v", t, err)
 			return
 		}
 		log.Infof("%v %s", t, line)
@@ -145,8 +142,8 @@ func (t *task) writeLogs(pid int, stdOut, stdErr io.ReadCloser) {
 	t.logID = id
 
 	t.wg.Add(2)
-	go t.writeLogStream(stdOut)
-	go t.writeLogStream(stdErr)
+	go t.logStream(stdOut)
+	go t.logStream(stdErr)
 }
 
 func execSystemCmdWait(cmdStr string, stdPipe func(pid int, out, err io.ReadCloser)) error {

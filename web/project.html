@@ -87,8 +87,8 @@
                         <div class="form-group" id="div_v2_cluster" style="display:none;" >
                             <label class="col-sm-2 control-label">部署集群</label>
                             <div class="col-sm-10">
-                                <select class="form-control" id="cluster" name="cluster">
-                                    <option value="0" selected="selected">测试集群</option>
+                                <select class="form-control" id="cluster_id" name="cluster_id">
+                                    <option value="1" selected="selected">测试集群</option>
                                 </select>
                             </div>
                         </div>
@@ -322,7 +322,7 @@
             success: 
             function(data,status) { 
                 $.each(data, function(i,val){
-                    $(".modal #cluster").append("<option value='"+val.ID+"'>"+val.Name+"</option>");
+                    $(".modal #cluster_id").append("<option value='"+val.ID+"'>"+val.Name+"</option>");
                 });
             },
             error: 

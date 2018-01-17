@@ -226,20 +226,20 @@ func (r *repeater) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	app, iface, err := r.GetInterface(req, id)
 	if err != nil {
 		if errors.Cause(err) == errForbidden {
-			log.Errorf("%s forbidden", id)
+			log.Infof("%s forbidden", id)
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		log.Errorf("%s GetInterface error:%s, req:%v", id, errors.ErrorStack(err), *req)
+		log.Errorf("%s error:%s", id, errors.ErrorStack(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	log.Infof("%s GetInterface success,app:%s,ifaceName:%s,ifacePath:%s", id, app.Name, iface.Name, iface.Path)
+	log.Infof("%s app:%s interface:%s path:%s", id, app.Name, iface.Name, iface.Path)
 
 	//验证输入参数
 	if err = r.Validate(req, iface); err != nil {
-		log.Errorf("%s app email:%v, iface email:%v validate error:%s, req:%v", id, app.Email, iface.Email, errors.ErrorStack(err), *req)
+		log.Errorf("%s app email:%v, iface email:%v validate error:%s", id, app.Email, iface.Email, errors.ErrorStack(err))
 		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -247,7 +247,7 @@ func (r *repeater) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	//生成后端请求
 	if err = r.buildRequest(id, iface, req); err != nil {
-		log.Errorf("%s app email:%v, iface email:%v buildRequest error:%s, req:%v", id, app.Email, iface.Email, errors.ErrorStack(err), *req)
+		log.Errorf("%s app email:%v, iface email:%v buildRequest error:%s", id, app.Email, iface.Email, errors.ErrorStack(err))
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
