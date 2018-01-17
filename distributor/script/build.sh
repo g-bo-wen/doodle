@@ -54,17 +54,21 @@ function generate_document() {
 
     for pkg in `go list ./...`
     do
-        #echo "package:" $pkg
+        echo "package:" $pkg
         for struct in `go doc -u -cmd $pkg|awk '/^type /{print $2}'`
         do
             structKey=$pkg.$struct
-            #echo "struct: $structKey"
+            echo "struct: $structKey"
             for m in `go doc -u -cmd $structKey|awk -F'[ |(]' '/^func /{print $5}'`
             do
                 methodKey=$structKey.$m
-                #echo "method: $methodKey" 
+                echo "method: $methodKey" 
                 comment=`go doc -u -cmd $methodKey|sed 1d`
-                #echo $comment
+                echo $comment
+                if [ "$pkg" == "`go list`" ] 
+                then
+                    methodKey="$pkg/main.$struct.$m"
+                fi
                 echo "docExport[\"$methodKey\"] = \`$comment\`" >> $document_file
             done
         done
