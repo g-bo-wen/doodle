@@ -24,7 +24,7 @@ func (res *resource) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := util.DecodeRequestValue(r, res); err != nil {
+	if err = util.DecodeRequestValue(r, res); err != nil {
 		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
 		return
 	}

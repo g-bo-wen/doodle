@@ -156,7 +156,6 @@ func (r *repeater) Validate(req *http.Request, iface *meta.Interface) error {
 
 //buildRequest 生成后端请求request,清理无用的请求参数
 func (r *repeater) buildRequest(id string, iface *meta.Interface, req *http.Request) error {
-	var err error
 	backend := iface.Backend
 
 	if iface.Project.Version == 1 {
@@ -185,6 +184,7 @@ func (r *repeater) buildRequest(id string, iface *meta.Interface, req *http.Requ
 		backend += "?" + args
 	}
 
+	var err error
 	if req.URL, err = url.Parse(backend); err != nil {
 		return errors.Trace(err)
 	}

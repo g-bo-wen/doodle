@@ -76,7 +76,7 @@ func (p *project) key() string {
 	aesKey = append(aesKey, []byte(strings.Repeat("\x00", 8-len(aesKey)%8))...)
 	key, err := util.AesEncrypt([]byte(s), aesKey)
 	if err != nil {
-		log.Errorf("AesEncrypt key:%s, error:%s", s, config.Distributor.Server.SecretKey, err)
+		log.Errorf("AesEncrypt key:%s, error:%s", s, err)
 		return ""
 	}
 

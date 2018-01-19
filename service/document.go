@@ -80,13 +80,13 @@ type docViewField struct {
 	Comment  string
 }
 
-func newDocView(doc document) docView {
-	doc.mu.Lock()
-	defer doc.mu.Unlock()
+func (d *document) view() docView {
+	d.mu.Lock()
+	defer d.mu.Unlock()
 
 	dv := docView{}
 
-	for mk, mv := range doc.Modules {
+	for mk, mv := range d.Modules {
 		for mmk, mmv := range mv.Methods {
 			dvm := docViewMethod{
 				Name:    mk,

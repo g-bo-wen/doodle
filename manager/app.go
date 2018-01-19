@@ -135,7 +135,7 @@ func (a *app) GET(w http.ResponseWriter, r *http.Request) {
 		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
-	if err := util.DecodeRequestValue(r, &vars); err != nil {
+	if err = util.DecodeRequestValue(r, &vars); err != nil {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
@@ -219,7 +219,7 @@ func (a *app) POST(w http.ResponseWriter, r *http.Request) {
 		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
-	if err := util.DecodeRequestValue(r, a); err != nil {
+	if err = util.DecodeRequestValue(r, a); err != nil {
 		log.Errorf("DecodeRequestValue req:%+v, error:%s", r, errors.ErrorStack(err))
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return

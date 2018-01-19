@@ -180,7 +180,7 @@ func RoleGetWithToken(token, email string) ([]meta.Role, error) {
 		return nil, fmt.Errorf("invalid token %s", token)
 	}
 
-	where := fmt.Sprintf("app_id=%d and role.id=%d and role.user_id=user.id", id)
+	where := fmt.Sprintf("app_id=%d and role.user_id=user.id", id)
 	if email != "" {
 		where += fmt.Sprintf(" and user.email='%s'", email)
 	}

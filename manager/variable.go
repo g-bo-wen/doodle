@@ -75,7 +75,7 @@ func (v *variable) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := util.DecodeRequestValue(r, &vars); err != nil {
+	if err = util.DecodeRequestValue(r, &vars); err != nil {
 		fmt.Fprintf(w, err.Error())
 		return
 	}

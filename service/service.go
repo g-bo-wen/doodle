@@ -115,7 +115,7 @@ func (s *Service) Register(obj interface{}) error {
 
 //Start 开启服务.
 func (s *Service) Start() {
-	s.docView = newDocView(s.doc)
+	s.docView = s.doc.view()
 	server.RegisterPath(&s.docView, "/doc/")
 
 	//第一步，启动服务

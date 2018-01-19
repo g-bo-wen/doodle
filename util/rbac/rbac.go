@@ -329,7 +329,7 @@ func (c Client) GetResource(resID int64) (meta.Resource, error) {
 	}
 
 	if r.Status != 0 {
-		log.Errorf("Get:%v error:%s", r.Message)
+		log.Errorf("Get:%v error:%s", url, r.Message)
 		return meta.Resource{}, fmt.Errorf(r.Message)
 	}
 

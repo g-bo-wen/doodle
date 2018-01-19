@@ -59,7 +59,7 @@ func (p *project) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := util.DecodeRequestValue(r, &vars); err != nil {
+	if err = util.DecodeRequestValue(r, &vars); err != nil {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
@@ -129,7 +129,7 @@ func (p *project) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := util.DecodeRequestValue(r, &vars); err != nil {
+	if err = util.DecodeRequestValue(r, &vars); err != nil {
 		log.Errorf("invalid request:%v, error:%v", r, errors.ErrorStack(err))
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return

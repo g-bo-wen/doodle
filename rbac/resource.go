@@ -41,8 +41,8 @@ func (res *rbacResource) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if vars.Query == 0 {
-		rs, err := ResourceGet(appID, int64(vars.ID))
-		if err != nil {
+		var rs []meta.Resource
+		if rs, err = ResourceGet(appID, int64(vars.ID)); err != nil {
 			server.SendResponse(w, http.StatusBadRequest, err.Error())
 			log.Errorf("ResourceGet error:%v, vars:%v", errors.ErrorStack(err), vars)
 			return
