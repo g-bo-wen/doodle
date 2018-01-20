@@ -80,8 +80,8 @@ func (r *repeater) GetInterface(req *http.Request, id string) (app *meta.Applica
 	}
 
 	//如果不需要验证权限，直接通过
-	if !iface.Project.Validate {
-		log.Debugf("%s project:%v validate is flase, app:%v", id, id, iface.Project, app)
+	if !iface.Service.Validate {
+		log.Debugf("%s project:%v validate is flase, app:%v", id, id, iface.Service, app)
 		return
 	}
 
@@ -158,7 +158,7 @@ func (r *repeater) Validate(req *http.Request, iface *meta.Interface) error {
 func (r *repeater) buildRequest(id string, iface *meta.Interface, req *http.Request) error {
 	backend := iface.Backend
 
-	if iface.Project.Version == 1 {
+	if iface.Service.Version == 1 {
 		apps, err := bs.getMicroAPPs(iface.Backend)
 		if err != nil {
 			return errors.Trace(err)

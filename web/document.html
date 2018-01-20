@@ -5,11 +5,11 @@
 <div class="container">
     <div class="panel panel-default">
         <div class="panel-body bs-callout-info">
-            <h4 >项目名</h4>
-            <p id="projectName"></p>
+            <h4 >服务名</h4>
+            <p id="serviceName"></p>
 
-            <h4>项目备注</h4>
-            <p id="projectInfo"> </p>
+            <h4>服务备注</h4>
+            <p id="serviceInfo"> </p>
 
             <h4 >接口名</h4>
             <p id="interfaceName"></p>
@@ -110,21 +110,21 @@
 </div>
 <script>
     var interfaceID = requestParse("interfaceID");
-    var projectID = requestParse("projectID");
+    var serviceID = requestParse("serviceID");
 
-    var project,iface,vars;
+    var service,iface,vars;
 
     function jumpToVariable() {
-        window.parent.location = "?action=project&page=variable&projectID="+projectID+"&interfaceID="+interfaceID;
+        window.parent.location = "?action=service&page=variable&serviceID="+serviceID+"&interfaceID="+interfaceID;
     }
 
-    function loadProjectInfo() {
+    function loadServiceInfo() {
         $.ajax({
             type: "GET",
-            url: "project/info/?id="+projectID,
+            url: "service/info/?id="+serviceID,
             async: false,
             success: function(data,status) { 
-                project = data;
+                service = data;
             },
             error: function(req, data, error) { 
                 showMessage("<h4>"+req.responseText+"</h4>"+error);
@@ -189,12 +189,12 @@
     }
 
     function initTopLink() {
-        if (action == "project") {
+        if (action == "service") {
             $("#top_link").html(
             '<span class="glyphicon glyphicon-home" aria-hidden="true"></span>' +
-            '<a target="_parent" href="?action=project&page=project" >项目管理</a>' +
+            '<a target="_parent" href="?action=service&page=service" >服务管理</a>' +
             '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
-            '<a target="_parent" href="?action=project&page=interface&projectID='+projectID+'" >接口管理</a>' +
+            '<a target="_parent" href="?action=service&page=interface&serviceID='+serviceID+'" >接口管理</a>' +
             '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
             '<span class="active" id="link_title"></span>'
             );
@@ -212,21 +212,21 @@
     $(function(){
         initTopLink();
 
-        loadProjectInfo();
+        loadServiceInfo();
         loadInterfaceInfo();
         loadVariableInfo();
 
-        if (project.version == 1) {
-        $("#api_url").html("<code>http://"+domain+":9000/"+project.path+iface.Path+"</code>");
+        if (service.version == 1) {
+        $("#api_url").html("<code>http://"+domain+":9000/"+service.path+iface.Path+"</code>");
         }
         else {
-        $("#api_url").html("<code>http://"+domain+":9000/"+project.path+"/"+iface.Path+"/</code>");
+        $("#api_url").html("<code>http://"+domain+":9000/"+service.path+"/"+iface.Path+"/</code>");
 
         }
 
 
-        $("#projectName").html(project.name);
-        $("#projectInfo").html(project.comment);
+        $("#serviceName").html(service.name);
+        $("#serviceInfo").html(service.comment);
         $("#interfaceName").html(iface.Name);
         $("#interfaceInfo").html(iface.Comment);
         $("#level").html(getLevelName(iface.Level));

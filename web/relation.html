@@ -1,7 +1,7 @@
 <div class="toplink">
     <div class="container">
         <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
-        <a target="_parent" href="?action=project&page=project" >项目管理</a>
+        <a target="_parent" href="?action=service&page=service" >服务管理</a>
         <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
         <a href="#" onclick="jumpToInterface()">接口管理</a>
         <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
@@ -98,23 +98,23 @@
 </div>
 <script>
 
-    var projectID = requestParse("projectID");
+    var serviceID = requestParse("serviceID");
     var interfaceID = requestParse("interfaceID");
 
     function jumpToInterface() {
-        window.parent.location = "?action=project&page=interface&projectID="+projectID;
+        window.parent.location = "?action=service&page=interface&serviceID="+serviceID;
     }
     function jumpToVariable() {
-        window.parent.location = "?action=project&page=variable&projectID="+projectID+"&interfaceID="+interfaceID;
+        window.parent.location = "?action=service&page=variable&serviceID="+serviceID+"&interfaceID="+interfaceID;
     }
 
     //添加关联列表的连接
-    function projectFormatter(value, row, index) {
-        return '<a href="?action=application&page=interface&projectID='+row.ProjectID+'" target="_parent">'+value+'</a> ';
+    function serviceFormatter(value, row, index) {
+        return '<a href="?action=application&page=interface&serviceID='+row.ServiceID+'" target="_parent">'+value+'</a> ';
     }
 
     function interfaceFormatter(value, row, index) {
-        return '<a href="?action=application&page=variable&projectID='+row.ProjectID+'&interfaceID='+row.InterfaceID+'" target="_parent">'+value+'</a> ';
+        return '<a href="?action=application&page=variable&serviceID='+row.ServiceID+'&interfaceID='+row.InterfaceID+'" target="_parent">'+value+'</a> ';
     }
 
     //添加`操作`列对应事件
@@ -181,7 +181,7 @@
 
         $("#app_table").bootstrapTable('getAllSelections').forEach(function(e) { count++; });
         if (count == 0)  {
-            showMessage("没选择任务项目");
+            showMessage("没选择任务服务");
             return;
         }
 
@@ -237,14 +237,14 @@
     }
 
 
-    function loadProject() {
+    function loadService() {
         $.ajax({
             type: "GET",
-            url: "project/?order=desc&offset=0&limit=0",
+            url: "service/?order=desc&offset=0&limit=0",
             async: false,
             success: function(data,status) { 
                 $.each(data.rows, function (i, item) {  
-                    $("#projectID").append('<option value ="'+item.ID+'">'+item.Name+'</option>');
+                    $("#serviceID").append('<option value ="'+item.ID+'">'+item.Name+'</option>');
                 });  
             },
             error: function(req, data, error) { 
@@ -269,7 +269,7 @@
 
     $(function (){
         $('#data_table').bootstrapTable('refreshOptions',{});
-        loadProject();
+        loadService();
         loadInterfaceInfo();
     })
 </script>

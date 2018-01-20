@@ -19,7 +19,7 @@
         >
         <thead>
             <tr>
-                <th data-field= 'ProjectName' data-sortable="true" >项目</th>
+                <th data-field= 'ServiceName' data-sortable="true" >服务</th>
                 <th data-field= 'InterfaceName' data-sortable="true" data-formatter="interfaceFormatter">接口</th>
                 <th data-field= 'Mtime' data-sortable="true">时间</th>
             </tr>
@@ -39,7 +39,7 @@
 
 
     function interfaceFormatter(value, row, index) {
-        return '<a href="?action=project&page=document&projectID='+row.ProjectID+'&interfaceID='+row.InterfaceID+'" target="_parent">'+value+'</a> ';
+        return '<a href="?action=service&page=document&serviceID='+row.ServiceID+'&interfaceID='+row.InterfaceID+'" target="_parent">'+value+'</a> ';
     }
 
     function loadAppInfo() {

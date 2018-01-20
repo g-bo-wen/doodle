@@ -17,7 +17,7 @@ import (
 
 type dbCache struct {
 	cache       *cache.Cache
-	selProject  *sql.Stmt
+	selService  *sql.Stmt
 	selIface    *sql.Stmt
 	selVar      *sql.Stmt
 	selApp      *sql.Stmt
@@ -31,9 +31,9 @@ func (dc *dbCache) closeAll() {
 		dc.dbc.Close()
 		dc.dbc = nil
 	}
-	if dc.selProject != nil {
-		dc.selProject.Close()
-		dc.selProject = nil
+	if dc.selService != nil {
+		dc.selService.Close()
+		dc.selService = nil
 	}
 	if dc.selIface != nil {
 		dc.selIface.Close()
@@ -67,7 +67,7 @@ func (dc *dbCache) conectDB() error {
 		return errors.Trace(err)
 	}
 
-	if dc.selProject, err = dc.dbc.Prepare("select id, validate, version from project where path=?"); err != nil {
+	if dc.selService, err = dc.dbc.Prepare("select id, validate, version from project where path=?"); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -182,8 +182,8 @@ func (dc *dbCache) getInterface(key string) (*meta.Interface, error) {
 		return nil, errors.Trace(errInvalidPath)
 	}
 
-	p := meta.Project{}
-	if err := dc.queryDB(dc.selProject, []interface{}{ps[1]}, []interface{}{&p.ID, &p.Validate, &p.Version}); err != nil {
+	p := meta.Service{}
+	if err := dc.queryDB(dc.selService, []interface{}{ps[1]}, []interface{}{&p.ID, &p.Validate, &p.Version}); err != nil {
 		return nil, errors.Trace(err)
 	}
 
@@ -203,7 +203,7 @@ func (dc *dbCache) getInterface(key string) (*meta.Interface, error) {
 	}
 
 	i.Path = path
-	i.Project = p
+	i.Service = p
 
 	dc.cache.Add(key, &i)
 

@@ -42,10 +42,10 @@ func ServerInit() error {
 	server.RegisterPath(&roleInfo{}, "/role/info/")
 	server.RegisterPath(&userRole{}, "/user/role/")
 
-	server.RegisterPath(&projectInfo{}, "/project/info/")
-	server.RegisterPath(&project{}, "/project/")
-
+	server.RegisterPath(&serviceInfo{}, "/service/info/")
 	server.RegisterPath(&service{}, "/service/")
+
+	server.RegisterPath(&nodes{}, "/nodes/")
 
 	server.RegisterPath(&interfaceAction{}, "/interface/")
 	server.RegisterPath(&interfaceRegister{}, "/interface/register/")

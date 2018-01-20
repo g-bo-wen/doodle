@@ -23,18 +23,18 @@ type Relation struct {
 	ApplicationName  string `db:"application.name"`
 	ApplicationUser  string `db:"application.user"`
 	ApplicationEmail string `db:"application.email"`
-	ProjectID        int64  `db:"project.id"`
-	ProjectName      string `db:"project.name"`
-	ProjectUser      string `db:"project.user"`
-	ProjectEmail     string `db:"project.email"`
+	ServiceID        int64  `db:"service.id"`
+	ServiceName      string `db:"service.name"`
+	ServiceUser      string `db:"service.user"`
+	ServiceEmail     string `db:"service.email"`
 	InterfaceID      int64  `db:"interface.id"`
 	InterfaceName    string `db:"interface.name"`
 	Ctime            string
 	Mtime            string
 }
 
-//Project 项目信息
-type Project struct {
+//Service 微服务信息.
+type Service struct {
 	ID         int64  `json:"id" db_default:"auto"`
 	RoleID     int64  `json:"role_id" `
 	ResourceID int64  `json:"resource_id" `
@@ -72,7 +72,7 @@ type Interface struct {
 	User    string
 	Email   string
 	State   bool
-	Project Project `db_table:"one"`
+	Service Service `db_table:"one"`
 	Path    string
 	Method  server.Method
 	Backend string

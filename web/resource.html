@@ -74,15 +74,15 @@
 <script>
 
     var resourceID = requestParse("resourceID");
-    var projectID = requestParse("projectID");
+    var serviceID = requestParse("serviceID");
     var resourceInfo;
-    var projectInfo;
+    var serviceInfo;
 
     $("#resource_id").val(resourceID);
 
     //添加`操作`列对应事件
     function actionFormatter(value, row, index) {
-        if (row.RoleID == projectInfo.role_id) {
+        if (row.RoleID == serviceInfo.role_id) {
             return '';
         }
         return '<a class="delete glyphicon glyphicon-trash" href="javascript:void(0)" title="删除"></a>' ;
@@ -200,14 +200,14 @@
         return params; 
     }
 
-    function loadProjectInfo() {
+    function loadServiceInfo() {
         $.ajax(
         {
             type: "GET",
-            url: "project/info/?id="+projectID,
+            url: "service/info/?id="+serviceID,
             async: false,
             success: function(data,status) { 
-                projectInfo = data;
+                serviceInfo = data;
             },
             error: function(req, data, error) { 
                 showMessage("<h3>"+req.responseText+"</h3>");
@@ -236,15 +236,15 @@
     }
 
     function nameFormatter(value, row, index) {
-        return '<a target="_parent" href="?action=project&page=user&projectID='+projectID+'&roleID='+row.ID+'&resourceID='+resourceID+'" >'+value+'</a>';
+        return '<a target="_parent" href="?action=service&page=user&serviceID='+serviceID+'&roleID='+row.ID+'&resourceID='+resourceID+'" >'+value+'</a>';
     }
 
     function initTopLink() {
         $("#top_link").html(
         '<span class="glyphicon glyphicon-home" aria-hidden="true"></span>' +
-        '<a target="_parent" href="?action=project&page=project" >项目管理</a>' +
+        '<a target="_parent" href="?action=service&page=service" >服务管理</a>' +
         '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
-        '<a target="_parent" href="?action=project&page=interface&projectID='+projectID+'" >接口管理</a>' +
+        '<a target="_parent" href="?action=service&page=interface&serviceID='+serviceID+'" >接口管理</a>' +
         '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
         '<span class="active" id="link_title"></span>'
         );
@@ -262,13 +262,13 @@
         if (account.IsAdmin) {
             return;
         }
-        if (account.Res.find(function(v){return v==projectInfo.resource_id}) != projectInfo.resource_id ) {
+        if (account.Res.find(function(v){return v==serviceInfo.resource_id}) != serviceInfo.resource_id ) {
             showMessage("<h3>没有权限访问此页面</h3>");
             state = 403;
             return;
         }
 
-        if (account.email == "" || projectInfo.email != account.email) {
+        if (account.email == "" || serviceInfo.email != account.email) {
             showMessage("<h3>没有权限访问此页面</h3>");
             state = 403;
             return;
@@ -276,7 +276,7 @@
     }
 
     $(function (){
-        loadProjectInfo();
+        loadServiceInfo();
         initView();
         initTopLink();
         loadResourceInfo();

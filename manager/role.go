@@ -20,24 +20,24 @@ func (ri *roleInfo) GET(w http.ResponseWriter, r *http.Request) {
 	_, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, &vars); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	ro, err := rbacClient.GetRole(vars.RoleID)
 	if err != nil {
-		response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
+		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		log.Errorf("RoleInfoGet vars:%v error:%s", vars, errors.ErrorStack(err))
 		return
 	}
 
 	log.Debugf("query:%v, role:%v", vars, ro)
-	response(w, Response{Data: ro})
+	util.SendResponseJSON(w, ro)
 }
 
 type role struct {
@@ -88,11 +88,11 @@ func (r *role) POST(w http.ResponseWriter, req *http.Request) {
 	u, err := session.User(req)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), req)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err = util.DecodeRequestValue(req, r); err != nil {
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
@@ -105,25 +105,25 @@ func (r *role) POST(w http.ResponseWriter, req *http.Request) {
 	id, err := rbacClient.PostRole(r.Name, r.Comment, r.User, r.Email)
 	if err != nil {
 		log.Errorf("RoleAdd error, vars:%v, err:%v", r, err)
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	log.Debugf("add role %v, id:%d", r, id)
+	util.SendResponseJSON(w, id)
 
-	response(w, Response{Data: id})
 }
 
 func (r *role) PUT(w http.ResponseWriter, req *http.Request) {
 	u, err := session.User(req)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), req)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(req, r); err != nil {
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
@@ -135,12 +135,12 @@ func (r *role) PUT(w http.ResponseWriter, req *http.Request) {
 
 	if err := rbacClient.PutRole(r.RoleID, r.Name, r.Comment); err != nil {
 		log.Errorf("RoleUpdate error, vars:%v, err:%v", r, err)
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	log.Debugf("update role %v", r)
-	response(w, Response{})
+	util.SendResponseJSON(w, nil)
 }
 
 type roleUser struct {
@@ -156,42 +156,43 @@ type roleUser struct {
 
 func (ru *roleUser) PUT(w http.ResponseWriter, r *http.Request) {
 	if err := util.DecodeRequestValue(r, ru); err != nil {
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	if err := rbacClient.PutUser(ru.UserID, ru.Name, ru.Email); err != nil {
 		log.Errorf("UserUpdate vars:%v, err:%v", ru, err)
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	log.Debugf("update user:%+v", ru)
 
-	response(w, Response{})
+	util.SendResponseJSON(w, nil)
+
 }
 
 func (ru *roleUser) POST(w http.ResponseWriter, r *http.Request) {
 	if err := util.DecodeRequestValue(r, ru); err != nil {
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	id, err := rbacClient.PostRoleUser(ru.RoleID, ru.Name, ru.Email)
 	if err != nil {
 		log.Errorf("PostRoleUser error, vars:%v, err:%v", ru, err)
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	log.Debugf("add role %+v, id:%d", ru, id)
 
-	response(w, Response{Data: id})
+	util.SendResponseJSON(w, id)
 }
 
 func (ru *roleUser) GET(w http.ResponseWriter, r *http.Request) {
 	if err := util.DecodeRequestValue(r, ru); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -206,19 +207,19 @@ func (ru *roleUser) GET(w http.ResponseWriter, r *http.Request) {
 
 	rs, err := rbacClient.GetRoleUsers(ru.RoleID)
 	if err != nil {
-		response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
+		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		log.Errorf("query vars:%v error:%s", ru, errors.ErrorStack(err))
 		return
 	}
 
 	if len(rs) == 0 {
-		response(w, Response{Status: http.StatusNotFound, Message: "not found"})
+		util.SendResponse(w, http.StatusNotFound, "not found")
 		log.Debugf("role not found, vars:%v", ru)
 		return
 	}
 
 	log.Debugf("query:%v, role:%v", ru, rs)
-	response(w, rs)
+	util.SendResponseJSON(w, rs)
 }
 
 type userRole struct {
@@ -232,12 +233,12 @@ func (ur *userRole) GET(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, ur); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -252,13 +253,13 @@ func (ur *userRole) GET(w http.ResponseWriter, r *http.Request) {
 
 	rs, err := rbacClient.GetUserRoles(u.Email)
 	if err != nil {
-		response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
+		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		log.Errorf("query vars:%v error:%s", ur, errors.ErrorStack(err))
 		return
 	}
 
 	if len(rs) == 0 {
-		response(w, Response{Status: http.StatusNotFound, Message: "not found"})
+		util.SendResponse(w, http.StatusNotFound, "not found")
 		log.Debugf("role not found, vars:%v", ur)
 		return
 	}
@@ -270,19 +271,19 @@ func (ur *userRole) GET(w http.ResponseWriter, r *http.Request) {
 //DELETE 删除角色
 func (r *role) DELETE(w http.ResponseWriter, req *http.Request) {
 	if err := util.DecodeRequestValue(req, r); err != nil {
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	if err := rbacClient.DeleteRole(r.RoleID, ""); err != nil {
 		log.Errorf("RoleDelete error, vars:%v, err:%v", r, errors.ErrorStack(err))
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	log.Debugf("del role vars:%v", r)
 
-	response(w, Response{})
+	util.SendResponseJSON(w, nil)
 }
 
 //onRoleUserDelete 删除角色中的用户
@@ -290,22 +291,22 @@ func (ru *roleUser) DELETE(w http.ResponseWriter, r *http.Request) {
 	_, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, ru); err != nil {
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	if err := rbacClient.DeleteRoleUser(ru.RoleID, ru.Email); err != nil {
 		log.Errorf("RoleDelete error, vars:%v, err:%v", ru, errors.ErrorStack(err))
-		response(w, Response{Status: 500, Message: err.Error()})
+		util.SendResponse(w, 500, err.Error())
 		return
 	}
 
 	log.Debugf("del role user vars:%v", ru)
 
-	response(w, Response{})
+	util.SendResponseJSON(w, nil)
 }

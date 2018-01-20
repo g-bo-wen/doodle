@@ -51,12 +51,12 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a href="?action=project" class="navbar-brand logo" style="color:#03a9f4">{API}</a>
+                <a href="?action=service" class="navbar-brand logo" style="color:#03a9f4">{API}</a>
             </div>
             <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
             <ul class="nav navbar-nav">
                 <li id='overview'><a href="?action=overview" >Overview</a></li>
-                <li id='project' ><a href="?action=project" >项目中心</a></li>
+                <li id='service' ><a href="?action=service" >服务中心</a></li>
                 <li id='application' ><a href="?action=application">应用中心</a></li>
                 <li id='docs'><a href="?action=docs">文档中心</a></li>
                 <li id='role' ><a href="?action=role">权限管理</a></li>
@@ -144,7 +144,7 @@
                 page = requestParse("page");
 
                 if (action == "") {
-                    action="project";
+                    action="service";
                 }
 
                 param = location.href.substring(location.href.indexOf("?")+1, location.href.length); 

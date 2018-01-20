@@ -16,13 +16,13 @@ type statsSumAction struct {
 //GET 查询流量总数
 func (ssa *statsSumAction) GET(w http.ResponseWriter, r *http.Request) {
 	if err := util.DecodeRequestValue(r, ssa); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	ss, err := selectStats(ssa.ID)
 	if err != nil {
-		response(w, Response{Status: http.StatusNotFound, Message: "not found"})
+		util.SendResponse(w, http.StatusNotFound, "not found")
 		log.Debugf("stats not found")
 		return
 	}
@@ -38,7 +38,7 @@ type statsTopInterface struct {
 func (sti *statsTopInterface) GET(w http.ResponseWriter, r *http.Request) {
 	tis, err := selectTopIface()
 	if err != nil {
-		response(w, Response{Status: http.StatusNotFound, Message: "not found"})
+		util.SendResponse(w, http.StatusNotFound, "not found")
 		log.Debugf("stats not found")
 		return
 	}
@@ -54,13 +54,13 @@ type statsTopApplication struct {
 // GET 查询流量总数
 func (sta *statsTopApplication) GET(w http.ResponseWriter, r *http.Request) {
 	if err := util.DecodeRequestValue(r, sta); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	as, err := selectTopApp(sta.ID)
 	if err != nil {
-		response(w, Response{Status: http.StatusNotFound, Message: "not found"})
+		util.SendResponse(w, http.StatusNotFound, "not found")
 		log.Debugf("stats not found")
 		return
 	}
@@ -80,19 +80,19 @@ type statsErrors struct {
 // GET 查询流量总数
 func (se *statsErrors) GET(w http.ResponseWriter, r *http.Request) {
 	if err := util.DecodeRequestValue(r, se); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	var errs []statsError
 
-	where := "stats_error.app_id = application.id and stats_error.iface_id = interface.id and interface.project_id = project.id"
+	where := "stats_error.app_id = application.id and stats_error.iface_id = interface.id and interface.service_id = service.id"
 	if se.ID != 0 {
 		where = fmt.Sprintf(" stats_error.iface_id = %d and %s", se.ID, where)
 	}
 
-	total, err := query("stats_error,application,interface,project", where, se.Sort, se.Order, se.Page, se.Size, &errs)
+	total, err := query("stats_error,application,interface,service", where, se.Sort, se.Order, se.Page, se.Size, &errs)
 	if err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 

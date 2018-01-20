@@ -61,7 +61,7 @@ func (vi *variableInfo) GET(w http.ResponseWriter, r *http.Request) {
 func (v *variable) GET(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
 		InterfaceID int64  `json:"interfaceID" valid:"Required"`
-		ProjectID   int64  `json:"projectID" valid:"Required"`
+		ServiceID   int64  `json:"serviceID" valid:"Required"`
 		Sort        string `json:"sort"`
 		Order       string `json:"order"`
 		Page        int    `json:"offset"`
@@ -71,7 +71,7 @@ func (v *variable) GET(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -80,7 +80,7 @@ func (v *variable) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resID, err := getProjectResourceID(vars.ProjectID)
+	resID, err := getServiceResourceID(vars.ServiceID)
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 		return
@@ -136,7 +136,7 @@ func (v *variable) DELETE(w http.ResponseWriter, r *http.Request) {
 	_, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -178,7 +178,7 @@ func (v *variable) POST(w http.ResponseWriter, r *http.Request) {
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	util.SendResponse(w, 0, fmt.Sprintf(`{"id":%d}`, id))
+	util.SendResponse(w, 0, `{"id":%d}`, id)
 
 	log.Debugf("add Variable success, id:%v", id)
 }

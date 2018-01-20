@@ -37,7 +37,7 @@ func (c *cluster) GET(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -72,12 +72,12 @@ func (c *cluster) POST(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, &vars); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -113,12 +113,12 @@ func (c *cluster) DELETE(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, &vars); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -154,12 +154,12 @@ func (i *clusterInfo) GET(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, &vars); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -194,12 +194,12 @@ func (n *clusterNode) GET(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, &vars); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -230,12 +230,12 @@ func (n *clusterNode) DELETE(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, &vars); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -268,12 +268,12 @@ func (n *clusterNode) POST(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = util.DecodeRequestValue(r, &vars); err != nil {
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 

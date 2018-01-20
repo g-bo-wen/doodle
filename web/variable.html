@@ -1,7 +1,7 @@
 <div class="toplink">
     <div class="container">
         <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
-        <a target="_parent" href="?action=project&page=project" >项目管理</a> 
+        <a target="_parent" href="?action=service&page=service" >服务管理</a> 
         <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
         <a href="#" onclick="jumpToInterface()">接口管理</a>
         <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
@@ -130,7 +130,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    <h4 class="modal-title" id="delete_modal_title" >项目</h4>
+                    <h4 class="modal-title" id="delete_modal_title" >服务</h4>
                 </div>
                 <div class="modal-body" id="delete_modal_content">
 
@@ -161,7 +161,7 @@
     </div>
 </div>
 <script>
-    var projectID = requestParse("projectID");
+    var serviceID = requestParse("serviceID");
     var interfaceID = requestParse("interfaceID");
 
     function actionFormatter(value, row, index) {
@@ -230,10 +230,10 @@
         $("#variable_dialog").modal('show');
     }
 
-    var deleteProjectID = 0;
-    //显示删除项目确认对话框
+    var deleteServiceID = 0;
+    //显示删除服务确认对话框
     function deleteDialog(e, value, row, index) {
-        deleteProjectID = row.ID;
+        deleteServiceID = row.ID;
         $("#delete_modal_title").html("确认要删除以下参数吗？");
         $("#delete_modal_content").html("<h4>"+row.Name+"</h4>");
         $("#delete_dialog").modal('show');
@@ -293,13 +293,13 @@
 
     function doDelete() {
         $("#delete_dialog").modal('hide');
-        if (deleteProjectID == 0 ) {
+        if (deleteServiceID == 0 ) {
             return;
         }
 
         $.ajax({
             type: "DELETE",
-            url: "variable/?id="+deleteProjectID,
+            url: "variable/?id="+deleteServiceID,
             async: false,
             success: function(data,status) { 
                 showMessage("<h3>删除成功</h3>");
@@ -318,7 +318,7 @@
             $("#path").val("");
             $("#comment").val("");
         }
-        $("#modal_title").html("增加项目");
+        $("#modal_title").html("增加服务");
         $("#variable_dialog").modal('show');
     }
 
@@ -378,7 +378,7 @@
 
 
     function queryParams(params) {
-        params.projectID = projectID;
+        params.serviceID = serviceID;
         params.interfaceID = interfaceID;
         return params; 
     }
@@ -417,18 +417,18 @@
     }
 
     function jumpToInterface() {
-        window.parent.location = "?action=project&page=interface&projectID="+projectID;
+        window.parent.location = "?action=service&page=interface&serviceID="+serviceID;
     }
 
     function jumpToDocument() {
-        window.parent.location = "?action=project&page=document&projectID="+projectID+"&interfaceID="+interfaceID;
+        window.parent.location = "?action=service&page=document&serviceID="+serviceID+"&interfaceID="+interfaceID;
     }
     function jumpToRelation() {
-        window.parent.location = "?action=project&page=relation&projectID="+projectID+"&interfaceID="+interfaceID;
+        window.parent.location = "?action=service&page=relation&serviceID="+serviceID+"&interfaceID="+interfaceID;
     }
 
     function jumpStats() {
-        window.parent.location = "?action=overview&page=stats_error&projectID="+projectID+"&interfaceID="+interfaceID;
+        window.parent.location = "?action=overview&page=stats_error&serviceID="+serviceID+"&interfaceID="+interfaceID;
     }
 
 

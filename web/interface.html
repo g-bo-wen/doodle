@@ -1,7 +1,7 @@
 <div class="toplink">
     <div class="container">
         <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
-        <a target="_parent" href="?action=project&page=project" >项目管理</a>
+        <a target="_parent" href="?action=service&page=service" >服务管理</a>
         <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
         <span class="active" id="link_title"></span>
     </div> 
@@ -10,7 +10,7 @@
     <p id="toolbar">
     <button type="button" class="btn btn-success" onclick="newInterface()">新建接口</button>
     <button type="button" class="btn btn-warning" onclick="roleManager()" id="btnrbac" style="display:none">权限管理</button>
-    <button type="button" class="btn btn-info" onclick="serviceManager()" >服务管理</button>
+    <button type="button" class="btn btn-info" onclick="nodeManager()" >服务节点</button>
     </p>
 
     <table id="data_table"  
@@ -103,13 +103,13 @@
                         <div class="control-group">
                             <label class="control-label">负责人</label>
                             <div class="controls">
-                                <input type="text" class="form-control" id="user" name="user" value="" placeholder="项目管理员,中文" >
+                                <input type="text" class="form-control" id="user" name="user" value="" placeholder="服务管理员,中文" >
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label">邮箱地址</label>
                             <div class="controls">
-                                <input type="text" class="form-control" id="email" name="email" value="" placeholder="项目管理员邮箱地址" >
+                                <input type="text" class="form-control" id="email" name="email" value="" placeholder="服务管理员邮箱地址" >
                             </div>
                         </div>
                     </form>
@@ -122,7 +122,7 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div class="modal fade" id="service_dialog" style="z-index:2000">
+    <div class="modal fade" id="node_dialog" style="z-index:2000">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -130,13 +130,13 @@
                     <h4 class="modal-title" id="modal_title" >服务列表</h4>
                 </div>
                 <div class="modal-body" id="modal_content">
-                    <table id="service_table"  
+                    <table id="node_table"  
                         data-toggle="table"
-                        data-url="service/"
+                        data-url="nodes/"
                         data-pagination="true"
                         data-side-pagination="client"
                         data-page-list="[10, 20, 50, 100, 200]"
-                        data-query-params="queryServiceParams"
+                        data-query-params="queryNodeParams"
                         style="word-break:break-all; word-wrap:break-all;"
                         >
                         <thead>
@@ -155,7 +155,7 @@
     </div><!-- /.modal -->
 </div>
 <script>
-    var projectID = requestParse("projectID");
+    var serviceID = requestParse("serviceID");
 
     function serverFormatter(value, row, index) {
         return '<a target="_blank" href="http://'+row.Host+":"+row.Port+'/doc/" >'+row.Host+'</a>';
@@ -166,12 +166,12 @@
 
     //添加到接口的链接
     function nameFormatter(value, row, index) {
-        return '<a target="_parent" href="?action=project&page=variable&projectID='+projectID+'&interfaceID='+row.ID+'" >'+value+'</a>';
+        return '<a target="_parent" href="?action=service&page=variable&serviceID='+serviceID+'&interfaceID='+row.ID+'" >'+value+'</a>';
     }
 
     //接口前端地址
     function frontFormatter(value, row, index) {
-        return "/"+row.Project.path + row.Path;
+        return "/"+row.Service.path + row.Path;
     }
 
     //级别格式话0:重要,1:普通
@@ -189,7 +189,7 @@
         '&nbsp;&nbsp;' +
         '<a class="delete glyphicon glyphicon-trash" href="javascript:void(0)" title="删除"></a>' +
         '&nbsp;&nbsp;' +
-        '<a target="_parent" class="doc glyphicon glyphicon-info-sign" href="?action=project&page=document&projectID='+projectID+'&interfaceID='+row.ID+'" title="文档"></a>' +
+        '<a target="_parent" class="doc glyphicon glyphicon-info-sign" href="?action=service&page=document&serviceID='+serviceID+'&interfaceID='+row.ID+'" title="文档"></a>' +
         '&nbsp;&nbsp;'+
         '<a class="deploy glyphicon glyphicon-cloud-upload" href="javascript:void(0)" title="发布"></a>' ;
     }
@@ -245,7 +245,7 @@
     var confirmID = 0;
     var confirmType = 0;
 
-    //显示删除项目确认对话框
+    //显示删除服务确认对话框
     function deleteDialog(e, value, row, index) {
         confirmType = 0;
         confirmID = row.ID;
@@ -319,8 +319,8 @@
         $("#interface_dialog").modal('show');
     }
 
-    function serviceManager() {
-        $("#service_dialog").modal('show');
+    function nodeManager() {
+        $("#node_dialog").modal('show');
     }
 
     //提交修改or添加的数据
@@ -354,7 +354,7 @@
             url += "?id="+modifyID;
             method = "PUT";
         }
-        $("#pid").val(projectID);
+        $("#pid").val(serviceID);
         var data = $("#form_interface").serialize(); 
         $.ajax(
         {
@@ -390,13 +390,13 @@
     };
 
 
-    function queryServiceParams(params) {
-        params.projectID = projectID;
+    function queryNodeParams(params) {
+        params.serviceID = serviceID;
         return params; 
     }
 
     function queryParams(params) {
-        params.pid = projectID;
+        params.pid = serviceID;
         params.state=0; 
         return params; 
     }
@@ -431,16 +431,16 @@
         return {};
     }
 
-    var projectInfo;
+    var serviceInfo;
 
-    function loadProjectInfo() {
+    function loadServiceInfo() {
         $.ajax(
         {
             type: "GET",
-            url: "project/info/?id="+projectID,
+            url: "service/info/?id="+serviceID,
             async: false,
             success: function(data,status) { 
-                projectInfo = data;
+                serviceInfo = data;
                 $("#link_title").html(data.name);
                 $(document).attr("title","接口平台 - "+data.name);
             },
@@ -451,7 +451,7 @@
     }
 
     function roleManager() {
-        location.href="?action=project&page=resource&resourceID=" + projectInfo.resource_id+"&projectID="+projectID;
+        location.href="?action=service&page=resource&resourceID=" + serviceInfo.resource_id+"&serviceID="+serviceID;
     }
 
     var state = 0;
@@ -464,20 +464,20 @@
 
     function initView() {
         if (!account.IsAdmin) {
-            if (account.Res.find(function(v){return v==projectInfo.resource_id}) != projectInfo.resource_id ) {
+            if (account.Res.find(function(v){return v==serviceInfo.resource_id}) != serviceInfo.resource_id ) {
                 showMessage("<h3>没有权限访问此页面</h3>");
                 state = 403;
                 return;
             }
         }
 
-        if (account.IsAdmin || ((account.email != "" ) && (projectInfo.email == account.email))) {
+        if (account.IsAdmin || ((account.email != "" ) && (serviceInfo.email == account.email))) {
             $("#btnrbac").show();
         }
     }
 
     $(function(){
-        loadProjectInfo();
+        loadServiceInfo();
         initView();
 
         $('#data_table').bootstrapTable('refreshOptions',{});

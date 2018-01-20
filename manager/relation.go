@@ -35,8 +35,8 @@ func (ra *relation) GET(w http.ResponseWriter, r *http.Request) {
 	switch vars.Sort {
 	case "InterfaceName":
 		vars.Sort = "interface.name"
-	case "ProjectName":
-		vars.Sort = "project.name"
+	case "ServiceName":
+		vars.Sort = "service.name"
 	}
 
 	if vars.AppID != 0 {
@@ -53,11 +53,11 @@ func (ra *relation) GET(w http.ResponseWriter, r *http.Request) {
 	if where != "" {
 		where += " and "
 	}
-	where += " relation.interface_id=interface.id and relation.application_id = application.id and  interface.project_id = project.id"
+	where += " relation.interface_id=interface.id and relation.application_id = application.id and  interface.service_id = service.id"
 
 	var rs []meta.Relation
 
-	total, err := query("relation, application, interface, project", where, vars.Sort, vars.Order, vars.Page, vars.Size, &rs)
+	total, err := query("relation, application, interface, service", where, vars.Sort, vars.Order, vars.Page, vars.Size, &rs)
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 		return
@@ -66,7 +66,7 @@ func (ra *relation) GET(w http.ResponseWriter, r *http.Request) {
 	if len(rs) == 0 {
 		w.Header().Set("Content-Type", "Relationlication/json")
 		w.Write([]byte(`{"total":0,"rows":[]}`))
-		log.Debugf("project not found")
+		log.Debugf("service not found")
 		return
 	}
 
@@ -126,7 +126,7 @@ func (ra *relation) DELETE(w http.ResponseWriter, r *http.Request) {
 	}
 	util.SendResponse(w, 0, "")
 
-	log.Debugf("delete project:%v, success", vars.ID)
+	log.Debugf("delete service:%v, success", vars.ID)
 }
 
 func (ra *relation) POST(w http.ResponseWriter, r *http.Request) {

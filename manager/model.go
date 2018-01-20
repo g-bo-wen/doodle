@@ -32,23 +32,20 @@ type statsSum struct {
 }
 
 type statsTopApp struct {
-	AppID   int64
-	AppName string
-	AppUser string
-
+	AppID         int64
+	AppName       string
+	AppUser       string
 	InterfaceID   int64
 	InterfaceName string
 	InterfaceUser string
-
-	ProjectID   int64
-	ProjectName string
-
-	Value int64
+	ServiceID     int64
+	ServiceName   string
+	Value         int64
 }
 
 type statsTopIface struct {
 	ID            int64  `json:"id"`
-	ProjectName   string `json:"project"`
+	ServiceName   string `json:"service"`
 	InterfaceName string `json:"iface"`
 	User          string `json:"user"`
 	Value         int64  `json:"value"`
@@ -60,13 +57,6 @@ type ssoResp struct {
 	Data userinfo `json:"REQ_DATA"`
 	Flag bool     `json:"REQ_FLAG"`
 	Msg  string   `json:"REQ_MSG"`
-}
-
-//Response 通用返回
-type Response struct {
-	Status  int
-	Message string      `json:",omitempty"`
-	Data    interface{} `json:",omitempty"`
 }
 
 //QueryResponse 专门给bootstrap-table用的.
@@ -89,7 +79,7 @@ func response(w http.ResponseWriter, resp interface{}) {
 
 type iface struct {
 	ID        int64  `db_default:"auto"`
-	ProjectID int64  `json:"pid" valid:"Required"`
+	ServiceID int64  `json:"pid" valid:"Required"`
 	Name      string `json:"name"  valid:"Required"`
 	Method    int    `json:"method"`
 	User      string `json:"user"`
@@ -110,7 +100,7 @@ type statsError struct {
 	AppName     string `db:"application.name"`
 	IfaceID     int64  `db:"iface_id"`
 	IfaceName   string `db:"interface.name"`
-	ProjectName string `db:"project.name"`
+	ServiceName string `db:"service.name"`
 	Info        string
 	Ctime       string
 }

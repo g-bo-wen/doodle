@@ -66,7 +66,7 @@
 
     var roleID = requestParse("roleID");
     var action = requestParse("action");
-    var projectID = requestParse("projectID");
+    var serviceID = requestParse("serviceID");
     var resourceID = requestParse("resourceID");
     var roleInfo;
 
@@ -214,14 +214,14 @@
     }
 
     function initTopLink() {
-        if (action == "project") {
+        if (action == "service") {
             $("#top_link").html(
             '<span class="glyphicon glyphicon-home" aria-hidden="true"></span>' +
-            '<a target="_parent" href="?action=project&page=project" >项目管理</a>' +
+            '<a target="_parent" href="?action=service&page=service" >服务管理</a>' +
             '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
-            '<a target="_parent" href="?action=project&page=interface&projectID='+projectID+'" >接口管理</a>' +
+            '<a target="_parent" href="?action=service&page=interface&serviceID='+serviceID+'" >接口管理</a>' +
             '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
-            '<a target="_parent" href="?action=project&page=resource&projectID='+projectID+'&resourceID='+resourceID+'" >权限管理</a>' +
+            '<a target="_parent" href="?action=service&page=resource&serviceID='+serviceID+'&resourceID='+resourceID+'" >权限管理</a>' +
             '<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>' +
             '<span class="active" id="link_title"></span>'
             );

@@ -1,12 +1,15 @@
 package manager
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/dearcode/crab/http/server"
+	"github.com/dearcode/crab/orm"
+	"github.com/juju/errors"
 	"github.com/zssky/log"
 
+	"github.com/dearcode/doodle/meta"
 	"github.com/dearcode/doodle/util"
 )
 
@@ -16,7 +19,7 @@ type docs struct {
 // GET get docs.
 func (d *docs) GET(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
-		ProjectName   string `json:"projectName"`
+		ServiceName   string `json:"serviceName"`
 		InterfaceName string `json:"interfaceName"`
 		Sort          string `json:"sort"`
 		Order         string `json:"order"`
@@ -29,13 +32,13 @@ func (d *docs) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var where string
+    where := "interface.state = 1"
 
-	if vars.ProjectName != "" {
+	if vars.ServiceName != "" {
 		if where != "" {
 			where += " and "
 		}
-		where += fmt.Sprintf("project.name like '%%%s%%'", vars.ProjectName)
+		where += fmt.Sprintf("service.name like '%%%s%%'", vars.ServiceName)
 	}
 
 	if vars.InterfaceName != "" {
@@ -45,47 +48,41 @@ func (d *docs) GET(w http.ResponseWriter, r *http.Request) {
 		where += fmt.Sprintf("interface.name like '%%%s%%'", vars.InterfaceName)
 	}
 
-	if where != "" {
-		where += " and "
-	}
-	where += fmt.Sprintf("interface.project_id = project.id and interface.state = 1")
-
 	switch vars.Sort {
 	case "InterfaceName":
 		vars.Sort = "interface.name"
-	case "ProjectName":
-		vars.Sort = "project.name"
+	case "ServiceName":
+		vars.Sort = "service.name"
 	}
 
-	items := []struct {
-		ProjectID     int64  `db:"project.id"`
-		Path          string `db:"CONCAT(project.path,'/',interface.path)"`
-		ProjectName   string `db:"project.name"`
-		InterfaceID   int64  `db:"interface.id"`
-		InterfaceName string `db:"interface.name"`
-		User          string `db:"interface.user"`
-		Email         string `db:"interface.email"`
-	}{}
-
-	total, err := query("project,interface", where, vars.Sort, vars.Order, vars.Page, vars.Size, &items)
+	db, err := mdb.GetConnection()
 	if err != nil {
+		log.Errorf("GetConnection req:%+v, error:%s", r, errors.ErrorStack(err))
+		util.SendResponse(w, http.StatusInternalServerError, "连接数据库出错")
+		return
+	}
+	defer db.Close()
+
+	var is []meta.Interface
+
+	stmt := orm.NewStmt(db, "interface").Where(where)
+
+	total, err := stmt.Count()
+	if err != nil {
+		log.Errorf("query interface,service count error:%v, vars:%v", errors.ErrorStack(err), vars)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	if total == 0 {
+		server.SendRows(w, 0, nil)
+		return
+	}
+
+	if err = stmt.Order(vars.Order).Sort(vars.Sort).Offset(vars.Page).Limit(vars.Size).Query(&is); err != nil {
+		log.Errorf("query interface,service error:%v, vars:%v", err, vars)
 		fmt.Fprintf(w, err.Error())
 		return
 	}
 
-	if len(items) == 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"total":0,"rows":[]}`))
-		log.Debugf("project not found")
-		return
-	}
-
-	buf, err := json.Marshal(items)
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(fmt.Sprintf(`{"total":%d, "rows":%s}`, total, buf)))
+	server.SendRows(w, total, is)
 }

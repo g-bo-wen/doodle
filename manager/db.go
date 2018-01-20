@@ -115,8 +115,8 @@ func query(table, where, sort, order string, offset, count int, result interface
 	return count, nil
 }
 
-func updateProject(id int64, name, user, email, path, comment, source string, version int) error {
-	sql := "update project set name=?, user=?, email=?, path=?, comment=?, mtime=now(),source=?,version=? where id=?"
+func updateService(id int64, name, user, email, path, comment, source string, version int) error {
+	sql := "update Service set name=?, user=?, email=?, path=?, comment=?, mtime=now(),source=?,version=? where id=?"
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return errors.Trace(err)
@@ -364,7 +364,7 @@ func getResourceID(table string, id int64) (int64, error) {
 	defer rows.Close()
 
 	if !rows.Next() {
-		return 0, fmt.Errorf("project %d not found", id)
+		return 0, fmt.Errorf("Service %d not found", id)
 	}
 
 	var p int64
@@ -408,7 +408,7 @@ func selectStats(id int64) ([]statsSum, error) {
 }
 
 func selectTopIface() ([]statsTopIface, error) {
-	sql := "SELECT i.id, p.name,i.name,i.user,sum(cnt) from stats as s,interface as i, project as p  where s.iface_id = i.id and  i.project_id = p.id and s.ctime > CURDATE()-interval 1 day GROUP BY iface_id ORDER BY sum(cnt) desc limit 10"
+	sql := "SELECT i.id, p.name,i.name,i.user,sum(cnt) from stats as s,interface as i, Service as p  where s.iface_id = i.id and  i.Service_id = p.id and s.ctime > CURDATE()-interval 1 day GROUP BY iface_id ORDER BY sum(cnt) desc limit 10"
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -425,7 +425,7 @@ func selectTopIface() ([]statsTopIface, error) {
 
 	for rows.Next() {
 		var ti statsTopIface
-		if err = rows.Scan(&ti.ID, &ti.ProjectName, &ti.InterfaceName, &ti.User, &ti.Value); err != nil {
+		if err = rows.Scan(&ti.ID, &ti.ServiceName, &ti.InterfaceName, &ti.User, &ti.Value); err != nil {
 			return nil, errors.Trace(err)
 		}
 		tis = append(tis, ti)
@@ -435,9 +435,9 @@ func selectTopIface() ([]statsTopIface, error) {
 }
 
 func selectTopApp(ifaceID int64) ([]statsTopApp, error) {
-	sql := "SELECT a.id, a.name,a.user, i.id, i.name,i.user,p.id, p.name, sum(cnt) from stats as s,interface as i, application as a, project as p where "
+	sql := "SELECT a.id, a.name,a.user, i.id, i.name,i.user,p.id, p.name, sum(cnt) from stats as s,interface as i, application as a, Service as p where "
 	if ifaceID > 0 {
-		sql += fmt.Sprintf("s.iface_id=%d and s.iface_id = i.id and  i.project_id = p.id and a.id = s.app_id and s.ctime > CURDATE()-interval 1 day GROUP BY iface_id ORDER BY sum(cnt) desc", ifaceID)
+		sql += fmt.Sprintf("s.iface_id=%d and s.iface_id = i.id and  i.Service_id = p.id and a.id = s.app_id and s.ctime > CURDATE()-interval 1 day GROUP BY iface_id ORDER BY sum(cnt) desc", ifaceID)
 	}
 	db, err := mdb.GetConnection()
 	if err != nil {
@@ -456,7 +456,7 @@ func selectTopApp(ifaceID int64) ([]statsTopApp, error) {
 
 	for rows.Next() {
 		var ta statsTopApp
-		if err = rows.Scan(&ta.AppID, &ta.AppName, &ta.AppUser, &ta.InterfaceID, &ta.InterfaceName, &ta.InterfaceUser, &ta.ProjectID, &ta.ProjectName, &ta.Value); err != nil {
+		if err = rows.Scan(&ta.AppID, &ta.AppName, &ta.AppUser, &ta.InterfaceID, &ta.InterfaceName, &ta.InterfaceUser, &ta.ServiceID, &ta.ServiceName, &ta.Value); err != nil {
 			return nil, errors.Trace(err)
 		}
 		tas = append(tas, ta)

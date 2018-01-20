@@ -151,7 +151,7 @@ func (ii *interfaceInfo) GET(w http.ResponseWriter, r *http.Request) {
 type interfaceAction struct {
 	ID        int64  `json:"id"`
 	State     int    `json:"state"`
-	ProjectID int64  `json:"pid"`
+	ServiceID int64  `json:"pid"`
 	Sort      string `json:"sort"`
 	Order     string `json:"order"`
 	Page      int    `json:"offset"`
@@ -163,7 +163,7 @@ func (i *interfaceAction) GET(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -172,7 +172,7 @@ func (i *interfaceAction) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resID, err := getProjectResourceID(i.ProjectID)
+	resID, err := getServiceResourceID(i.ServiceID)
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 		return
@@ -194,7 +194,7 @@ func (i *interfaceAction) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stmt := orm.NewStmt(db, "interface")
-	stmt = stmt.Where("project_id=%d", i.ProjectID)
+	stmt = stmt.Where("service_id=%d", i.ServiceID)
 
 	if i.State == 1 {
 		stmt = stmt.Where("state=1")
@@ -254,7 +254,7 @@ func (i *interfaceAction) POST(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -264,7 +264,7 @@ func (i *interfaceAction) POST(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resID, err := getProjectResourceID(vars.ProjectID)
+	resID, err := getServiceResourceID(vars.ServiceID)
 	if err != nil {
 		log.Errorf("invalid req:%+v", r)
 		util.SendResponse(w, http.StatusBadRequest, err.Error())
@@ -284,7 +284,7 @@ func (i *interfaceAction) POST(w http.ResponseWriter, r *http.Request) {
 	db, err := mdb.GetConnection()
 	if err != nil {
 		log.Errorf("GetConnection error:%v", errors.ErrorStack(err))
-		response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
+		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer db.Close()
@@ -409,7 +409,7 @@ const (
 
 func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 	vars := struct {
-		ProjectID int64
+		ServiceID int64
 		User      string
 		State     int
 		Email     string
@@ -433,16 +433,16 @@ func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 	db, err := mdb.GetConnection()
 	if err != nil {
 		log.Errorf("GetConnection error:%v", errors.ErrorStack(err))
-		response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
+		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	defer db.Close()
 
-	var p meta.Project
+	var p meta.Service
 
-	if err = orm.NewStmt(db, "project").Where("id=%v", vars.ProjectID).Query(&p); err != nil {
-		log.Errorf("Query project:%v error:%v", vars.ProjectID, errors.ErrorStack(err))
-		response(w, Response{Status: http.StatusInternalServerError, Message: err.Error()})
+	if err = orm.NewStmt(db, "service").Where("id=%v", vars.ServiceID).Query(&p); err != nil {
+		log.Errorf("Query service:%v error:%v", vars.ServiceID, errors.ErrorStack(err))
+		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -460,7 +460,7 @@ func (ir *interfaceRegister) POST(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var i meta.Interface
-		if err = orm.NewStmt(db, "interface").Where("project_id=%d and interface.path='%s' and method=%d", vars.ProjectID, vars.Path, vars.Method).Query(&i); err != nil {
+		if err = orm.NewStmt(db, "interface").Where("service_id=%d and interface.path='%s' and method=%d", vars.ServiceID, vars.Path, vars.Method).Query(&i); err != nil {
 			log.Errorf("query interface:%+v, error:%v", vars, err)
 			server.SendResponse(w, http.StatusInternalServerError, err.Error())
 			return

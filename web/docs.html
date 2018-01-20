@@ -12,8 +12,8 @@
         <div class="panel-body">
             <div class="form-group">
                 <div class="input-group">
-                    <div class="input-group-addon">所属项目</div>
-                    <input class="form-control" type="text" id="projectName" name="projectName" placeholder="根据项目名模糊匹配">
+                    <div class="input-group-addon">所属服务</div>
+                    <input class="form-control" type="text" id="serviceName" name="serviceName" placeholder="根据服务名模糊匹配">
                 </div>
             </div>
             <div class="form-group">
@@ -33,13 +33,13 @@
         data-side-pagination="server"
         data-sort-order="desc"
         data-query-params="queryParams"
-        data-page-list="[5, 10, 20, 50, 100, 200]"
+        data-page-list="[10, 20, 50, 100, 200]"
         >
         <thead>
             <tr>
-                <th data-field= 'ProjectName' data-sortable="true" >项目</th>
-                <th data-field= 'Path' data-sortable="true" >路径</th>
-                <th data-field= 'InterfaceName' data-sortable="true"  data-formatter="nameFormatter">接口</th>
+                <th data-field= 'Service.name' data-sortable="true" >服务</th>
+                <th data-field= 'Path' data-sortable="true"  data-formatter="pathFormatter">路径</th>
+                <th data-field= 'Name' data-sortable="true"  data-formatter="nameFormatter">接口</th>
                 <th data-field= 'User' data-sortable="true">联系人</th>
                 <th data-field= 'Email' data-sortable="true">邮箱</th>
             </tr>
@@ -50,7 +50,11 @@
 <script>
 
     function nameFormatter(value, row, index) {
-        return '<a href="?action=docs&page=document&projectID='+row.ProjectID+'&interfaceID='+row.InterfaceID+'" target="_parent">'+row.InterfaceName+'</a> ';
+        return '<a href="?action=docs&page=document&serviceID='+row.Service.id+'&interfaceID='+row.ID+'" target="_parent">'+row.Name+'</a> ';
+    }
+
+    function pathFormatter(value, row, index) {
+        return row.Service.path+row.Path;
     }
 
     function search() {
@@ -60,7 +64,7 @@
 
 
     function queryParams(params) {
-        params.projectName = $("#projectName").val();
+        params.serviceName = $("#serviceName").val();
         params.interfaceName = $("#interfaceName").val();
         return params; 
     }

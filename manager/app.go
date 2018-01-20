@@ -71,7 +71,7 @@ func (ais *appInfos) GET(w http.ResponseWriter, r *http.Request) {
 	if len(apps) == 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"total":0,"rows":[]}`))
-		log.Debugf("project not found")
+		log.Debugf("service not found")
 		return
 	}
 
@@ -132,7 +132,7 @@ func (a *app) GET(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err = util.DecodeRequestValue(r, &vars); err != nil {
@@ -170,7 +170,7 @@ func (a *app) GET(w http.ResponseWriter, r *http.Request) {
 	if len(apps) == 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"total":0,"rows":[]}`))
-		log.Debugf("project not found")
+		log.Debugf("service not found")
 		return
 	}
 
@@ -209,14 +209,14 @@ func (a *app) DELETE(w http.ResponseWriter, r *http.Request) {
 	}
 	util.SendResponse(w, 0, "")
 
-	log.Debugf("delete project:%v, success", vars.ID)
+	log.Debugf("delete service:%v, success", vars.ID)
 }
 
 func (a *app) POST(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err = util.DecodeRequestValue(r, a); err != nil {
@@ -261,7 +261,7 @@ func (a *app) POST(w http.ResponseWriter, r *http.Request) {
 
 	util.SendResponse(w, 0, fmt.Sprintf(`{"id":%d}`, id))
 
-	log.Debugf("add project success, id:%v, token:%s", id, token)
+	log.Debugf("add service success, id:%v, token:%s", id, token)
 }
 
 func (a *app) PUT(w http.ResponseWriter, r *http.Request) {
@@ -275,7 +275,7 @@ func (a *app) PUT(w http.ResponseWriter, r *http.Request) {
 	u, err := session.User(r)
 	if err != nil {
 		log.Errorf("session.User error:%v, req:%v", errors.ErrorStack(err), r)
-		response(w, Response{Status: http.StatusBadRequest, Message: err.Error()})
+		util.SendResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -299,5 +299,5 @@ func (a *app) PUT(w http.ResponseWriter, r *http.Request) {
 	}
 	util.SendResponse(w, 0, "")
 
-	log.Debugf("update project success, new:%+v", vars)
+	log.Debugf("update service success, new:%+v", vars)
 }
