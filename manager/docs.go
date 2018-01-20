@@ -32,7 +32,7 @@ func (d *docs) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    where := "interface.state = 1"
+	where := "interface.state = 1"
 
 	if vars.ServiceName != "" {
 		if where != "" {

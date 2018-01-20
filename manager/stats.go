@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/juju/errors"
 	"github.com/zssky/log"
 
 	"github.com/dearcode/doodle/util"
@@ -23,7 +24,7 @@ func (ssa *statsSumAction) GET(w http.ResponseWriter, r *http.Request) {
 	ss, err := selectStats(ssa.ID)
 	if err != nil {
 		util.SendResponse(w, http.StatusNotFound, "not found")
-		log.Debugf("stats not found")
+		log.Errorf("stats not found, error:%v", errors.ErrorStack(err))
 		return
 	}
 
@@ -39,7 +40,7 @@ func (sti *statsTopInterface) GET(w http.ResponseWriter, r *http.Request) {
 	tis, err := selectTopIface()
 	if err != nil {
 		util.SendResponse(w, http.StatusNotFound, "not found")
-		log.Debugf("stats not found")
+		log.Errorf("stats not found, error:%v", errors.ErrorStack(err))
 		return
 	}
 

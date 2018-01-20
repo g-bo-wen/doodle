@@ -14,6 +14,7 @@ var (
 	mdb    *orm.DB
 	dc     *dbCache
 	bs     *backendService
+	stats  *statsCache
 )
 
 //repeater 网关验证模块
@@ -25,6 +26,9 @@ func Init() error {
 	if err := config.Load(); err != nil {
 		return errors.Trace(err)
 	}
+
+	stats = newStatsCache()
+	go stats.run()
 
 	mdb = orm.NewDB(config.Repeater.DB.IP, config.Repeater.DB.Port, config.Repeater.DB.Name, config.Repeater.DB.User, config.Repeater.DB.Passwd, config.Repeater.DB.Charset, 10)
 

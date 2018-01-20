@@ -116,7 +116,7 @@ func query(table, where, sort, order string, offset, count int, result interface
 }
 
 func updateService(id int64, name, user, email, path, comment, source string, version int) error {
-	sql := "update Service set name=?, user=?, email=?, path=?, comment=?, mtime=now(),source=?,version=? where id=?"
+	sql := "update service set name=?, user=?, email=?, path=?, comment=?, mtime=now(),source=?,version=? where id=?"
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return errors.Trace(err)
@@ -364,7 +364,7 @@ func getResourceID(table string, id int64) (int64, error) {
 	defer rows.Close()
 
 	if !rows.Next() {
-		return 0, fmt.Errorf("Service %d not found", id)
+		return 0, fmt.Errorf("service %d not found", id)
 	}
 
 	var p int64
@@ -375,12 +375,12 @@ func getResourceID(table string, id int64) (int64, error) {
 }
 
 func selectStats(id int64) ([]statsSum, error) {
-	sql := "SELECT DATE_FORMAT(ctime,'%Y/%m/%d %H:%i') , SUM(cnt), ROUND(SUM(cost) / sum(cnt)) FROM stats "
+	sql := "SELECT event_time , cnt, ROUND(cost / cnt) FROM stats "
 	if id > 0 {
 		sql += fmt.Sprintf(" where stats.iface_id = %d ", id)
 	}
 
-	sql += "GROUP BY DATE_FORMAT(ctime,'%Y/%m/%d %H:%i') order by ctime desc limit 60;"
+	sql += "order by event_time desc limit 60;"
 
 	db, err := mdb.GetConnection()
 	if err != nil {
@@ -390,7 +390,7 @@ func selectStats(id int64) ([]statsSum, error) {
 
 	rows, err := db.Query(sql)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.Annotatef(err, "%s", sql)
 	}
 	defer rows.Close()
 
@@ -399,7 +399,7 @@ func selectStats(id int64) ([]statsSum, error) {
 	for rows.Next() {
 		var ss statsSum
 		if err = rows.Scan(&ss.Date, &ss.Sum, &ss.Avg); err != nil {
-			return nil, errors.Trace(err)
+			return nil, errors.Annotatef(err, "%s", sql)
 		}
 		sss = append(sss, ss)
 	}
@@ -408,7 +408,7 @@ func selectStats(id int64) ([]statsSum, error) {
 }
 
 func selectTopIface() ([]statsTopIface, error) {
-	sql := "SELECT i.id, p.name,i.name,i.user,sum(cnt) from stats as s,interface as i, Service as p  where s.iface_id = i.id and  i.Service_id = p.id and s.ctime > CURDATE()-interval 1 day GROUP BY iface_id ORDER BY sum(cnt) desc limit 10"
+	sql := "SELECT i.id, p.name,i.name,i.user,sum(cnt) from stats as s,interface as i, service as p  where s.iface_id = i.id and  i.service_id = p.id and s.mtime > CURDATE()-interval 1 day GROUP BY iface_id ORDER BY sum(cnt) desc limit 10"
 	db, err := mdb.GetConnection()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -435,9 +435,9 @@ func selectTopIface() ([]statsTopIface, error) {
 }
 
 func selectTopApp(ifaceID int64) ([]statsTopApp, error) {
-	sql := "SELECT a.id, a.name,a.user, i.id, i.name,i.user,p.id, p.name, sum(cnt) from stats as s,interface as i, application as a, Service as p where "
+	sql := "SELECT a.id, a.name,a.user, i.id, i.name,i.user,p.id, p.name, sum(cnt) from stats as s,interface as i, application as a, service as p where "
 	if ifaceID > 0 {
-		sql += fmt.Sprintf("s.iface_id=%d and s.iface_id = i.id and  i.Service_id = p.id and a.id = s.app_id and s.ctime > CURDATE()-interval 1 day GROUP BY iface_id ORDER BY sum(cnt) desc", ifaceID)
+		sql += fmt.Sprintf("s.iface_id=%d and app_id in (SELECT app_id from stats where iface_id = %d and mtime > CURDATE()-interval 1 day GROUP BY app_id ORDER BY sum(cnt) desc) and s.iface_id = i.id and  i.service_id = p.id and a.id = s.app_id and s.mtime > CURDATE()-interval 1 day group by app_id order  by sum(cnt)", ifaceID, ifaceID)
 	}
 	db, err := mdb.GetConnection()
 	if err != nil {

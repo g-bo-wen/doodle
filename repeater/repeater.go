@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -206,6 +207,7 @@ func (r *repeater) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if e := recover(); e != nil {
 			log.Errorf("%s recover %v", id, e)
+			log.Errorf("%s", debug.Stack())
 			util.SendResponse(w, http.StatusBadRequest, "%v", e)
 		}
 	}()
@@ -258,14 +260,18 @@ func (r *repeater) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	cost := time.Since(b) / time.Millisecond
 
 	if err != nil {
+		stats.failed(id, app.ID, iface.ID, err.Error())
 		log.Errorf("%s app email:%v,iface email:%v millisecond:%d end error:%s", id, app.Email, iface.Email, cost, err.Error())
 		util.SendResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if code != http.StatusOK {
+		stats.failed(id, app.ID, iface.ID, fmt.Sprintf("invalid http status:%v", code))
 		log.Errorf("%s app email:%v,iface email:%v millisecond:%d end failed, code:%d", id, app.Email, iface.Email, cost, code)
 	} else {
+		stats.success(app.ID, iface.ID, int64(cost))
+
 		log.Infof("%s %d end success, code:%d", id, cost, code)
 	}
 
